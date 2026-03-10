@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "talent-1",
+      "description": "Professional photographer at work",
+      "imageUrl": "https://picsum.photos/seed/talent1/600/400",
+      "imageHint": "photographer portfolio"
+    },
+    {
+      "id": "talent-2",
+      "description": "UI/UX designer crafting interface",
+      "imageUrl": "https://picsum.photos/seed/talent2/600/400",
+      "imageHint": "designer interface"
+    },
+    {
+      "id": "talent-3",
+      "description": "Musician playing guitar",
+      "imageUrl": "https://picsum.photos/seed/talent3/600/400",
+      "imageHint": "musician guitar"
+    },
+    {
+      "id": "workshop-1",
+      "description": "Coding bootcamp session",
+      "imageUrl": "https://picsum.photos/seed/ws1/600/400",
+      "imageHint": "coding workshop"
+    },
+    {
+      "id": "workshop-2",
+      "description": "Art class painting session",
+      "imageUrl": "https://picsum.photos/seed/ws2/600/400",
+      "imageHint": "painting class"
+    },
+    {
+      "id": "hero-image",
+      "description": "Collaborative creative workspace",
+      "imageUrl": "https://picsum.photos/seed/hero/1200/800",
+      "imageHint": "creative collaboration"
+    }
+  ]
 }

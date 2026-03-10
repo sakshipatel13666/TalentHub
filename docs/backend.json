@@ -1,0 +1,1225 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user account on the TalentHub platform, storing fundamental information and assigned roles. Authentication details are handled by an external system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's primary email address, used for communication and login.",
+          "format": "email"
+        },
+        "profilePhotoUrl": {
+          "type": "string",
+          "description": "URL to the user's profile picture.",
+          "format": "uri"
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short biographical description provided by the user."
+        },
+        "roles": {
+          "type": "array",
+          "description": "An array of roles assigned to the user (e.g., TalentCreator, Client, Student, Admin).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "roles",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SkillCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SkillCategory",
+      "type": "object",
+      "description": "Defines broad categories for skills and workshops (e.g., 'Music', 'Coding', 'Fitness').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SkillCategory entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the skill category (e.g., 'Music', 'Web Development')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what this skill category entails."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the skill category was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the skill category was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Skill": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Skill",
+      "type": "object",
+      "description": "Represents a specific skill that a Talent Creator possesses or a workshop teaches.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Skill entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the skill (e.g., 'Guitar Playing', 'ReactJS', 'Yoga Instruction')."
+        },
+        "skillCategoryId": {
+          "type": "string",
+          "description": "Reference to the SkillCategory this skill belongs to. (Relationship: SkillCategory 1:N Skill)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the skill was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the skill was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "skillCategoryId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TalentCreatorProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TalentCreatorProfile",
+      "type": "object",
+      "description": "Contains specific details for users who act as Talent Creators, showcasing their abilities and offerings.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the TalentCreatorProfile entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User associated with this talent profile. (Relationship: User 1:1 TalentCreatorProfile)"
+        },
+        "location": {
+          "type": "string",
+          "description": "The geographical location of the talent creator."
+        },
+        "averageRating": {
+          "type": "number",
+          "description": "The calculated average rating received by the talent creator."
+        },
+        "numReviews": {
+          "type": "number",
+          "description": "The total number of reviews received by the talent creator."
+        },
+        "skillIds": {
+          "type": "array",
+          "description": "References to skills possessed by the talent creator. (Relationship: TalentCreatorProfile N:N Skill)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "experienceIds": {
+          "type": "array",
+          "description": "References to professional experience entries for the talent creator. (Relationship: TalentCreatorProfile 1:N Experience)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "portfolioIds": {
+          "type": "array",
+          "description": "References to portfolio entries showcasing the talent creator's work. (Relationship: TalentCreatorProfile 1:N Portfolio)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "serviceIds": {
+          "type": "array",
+          "description": "References to services offered by the talent creator. (Relationship: TalentCreatorProfile 1:N Service)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Indicates if the talent creator is featured on the platform (managed by Admin)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the talent profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the talent profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "skillIds",
+        "experienceIds",
+        "portfolioIds",
+        "serviceIds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Experience": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Experience",
+      "type": "object",
+      "description": "Details a professional work or project experience for a Talent Creator.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Experience entity."
+        },
+        "talentCreatorProfileId": {
+          "type": "string",
+          "description": "Reference to the TalentCreatorProfile this experience belongs to. (Relationship: TalentCreatorProfile 1:N Experience)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the position or project (e.g., 'Senior Software Engineer')."
+        },
+        "company": {
+          "type": "string",
+          "description": "The name of the company or organization."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of the experience.",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of the experience, or null if it's current.",
+          "format": "date"
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of responsibilities and achievements in this role."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the experience was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the experience was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "talentCreatorProfileId",
+        "title",
+        "company",
+        "startDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Portfolio": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Portfolio",
+      "type": "object",
+      "description": "Represents a project or showcase entry within a Talent Creator's portfolio.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Portfolio entity."
+        },
+        "talentCreatorProfileId": {
+          "type": "string",
+          "description": "Reference to the TalentCreatorProfile this portfolio entry belongs to. (Relationship: TalentCreatorProfile 1:N Portfolio)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the portfolio entry or project."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the project or showcase."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the portfolio entry was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the portfolio entry was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "talentCreatorProfileId",
+        "title",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PortfolioAsset": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PortfolioAsset",
+      "type": "object",
+      "description": "An individual image, video, or external link associated with a Portfolio entry.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PortfolioAsset entity."
+        },
+        "portfolioId": {
+          "type": "string",
+          "description": "Reference to the Portfolio entry this asset belongs to. (Relationship: Portfolio 1:N PortfolioAsset)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the asset (e.g., 'image', 'video', 'externalLink', 'document')."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL to the asset (e.g., image URL, video embed link, external project URL).",
+          "format": "uri"
+        },
+        "caption": {
+          "type": "string",
+          "description": "A short caption or description for the asset."
+        },
+        "order": {
+          "type": "number",
+          "description": "The display order of this asset within its portfolio."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the portfolio asset was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the portfolio asset was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "portfolioId",
+        "type",
+        "url",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Service": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Service",
+      "type": "object",
+      "description": "Describes a specific service offered by a Talent Creator, including pricing and availability.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Service entity."
+        },
+        "talentCreatorProfileId": {
+          "type": "string",
+          "description": "Reference to the TalentCreatorProfile offering this service. (Relationship: TalentCreatorProfile 1:N Service)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the service (e.g., 'Custom Website Design', 'Private Guitar Lesson')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the service provided."
+        },
+        "priceAmount": {
+          "type": "number",
+          "description": "The monetary amount for the service."
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "The currency code for the price (e.g., 'USD', 'EUR')."
+        },
+        "availabilityDetails": {
+          "type": "string",
+          "description": "Details about when the service is available (e.g., 'M-F 9am-5pm', or a JSON string representing a complex schedule)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the service was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the service was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "talentCreatorProfileId",
+        "name",
+        "description",
+        "priceAmount",
+        "priceCurrency",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "JobRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobRequest",
+      "type": "object",
+      "description": "Represents a request from a Client to hire a Talent Creator for a specific project.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JobRequest entity."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the User (Client) who sent the job request. (Relationship: User 1:N JobRequest)"
+        },
+        "talentCreatorProfileId": {
+          "type": "string",
+          "description": "Reference to the TalentCreatorProfile targeted by this job request. (Relationship: TalentCreatorProfile 1:N JobRequest)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the job request (e.g., 'Develop a landing page')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the project requirements."
+        },
+        "budgetAmount": {
+          "type": "number",
+          "description": "The proposed budget for the project."
+        },
+        "budgetCurrency": {
+          "type": "string",
+          "description": "The currency code for the budget (e.g., 'USD')."
+        },
+        "deadline": {
+          "type": "string",
+          "description": "The requested deadline for project completion.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the job request (e.g., 'pending', 'accepted', 'rejected', 'in-progress', 'completed', 'cancelled')."
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Reference to the Conversation associated with this job request for communication. (Relationship: Conversation 1:1 JobRequest)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the job request was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the job request was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "talentCreatorProfileId",
+        "title",
+        "description",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Workshop": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Workshop",
+      "type": "object",
+      "description": "Defines a class, training session, or workshop created by a Talent Creator for students.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Workshop entity."
+        },
+        "talentCreatorProfileId": {
+          "type": "string",
+          "description": "Reference to the TalentCreatorProfile offering this workshop. (Relationship: TalentCreatorProfile 1:N Workshop)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the workshop."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the workshop content and objectives."
+        },
+        "skillIds": {
+          "type": "array",
+          "description": "References to skills covered or required for this workshop. (Relationship: Workshop N:N Skill)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "priceAmount": {
+          "type": "number",
+          "description": "The monetary cost for enrolling in the workshop."
+        },
+        "priceCurrency": {
+          "type": "string",
+          "description": "The currency code for the price (e.g., 'USD')."
+        },
+        "durationMinutes": {
+          "type": "number",
+          "description": "The duration of the workshop in minutes."
+        },
+        "scheduledDateTime": {
+          "type": "string",
+          "description": "The date and time when the workshop is scheduled to occur.",
+          "format": "date-time"
+        },
+        "maxParticipants": {
+          "type": "number",
+          "description": "The maximum number of participants allowed in the workshop."
+        },
+        "currentParticipants": {
+          "type": "number",
+          "description": "The current number of participants enrolled in the workshop."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the workshop (e.g., 'scheduled', 'cancelled', 'completed', 'draft')."
+        },
+        "locationDetails": {
+          "type": "string",
+          "description": "Details about where the workshop will be held (e.g., 'Online via Zoom', 'Studio A, 123 Main St')."
+        },
+        "averageRating": {
+          "type": "number",
+          "description": "The calculated average rating for this workshop."
+        },
+        "numReviews": {
+          "type": "number",
+          "description": "The total number of reviews received for this workshop."
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Indicates if the workshop is featured on the platform (managed by Admin)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the workshop was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the workshop was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "talentCreatorProfileId",
+        "title",
+        "description",
+        "skillIds",
+        "priceAmount",
+        "priceCurrency",
+        "durationMinutes",
+        "scheduledDateTime",
+        "maxParticipants",
+        "currentParticipants",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Enrollment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Enrollment",
+      "type": "object",
+      "description": "Records a student's enrollment in a specific workshop.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Enrollment entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (Student) who enrolled. (Relationship: User 1:N Enrollment)"
+        },
+        "workshopId": {
+          "type": "string",
+          "description": "Reference to the Workshop in which the student enrolled. (Relationship: Workshop 1:N Enrollment)"
+        },
+        "enrollmentDate": {
+          "type": "string",
+          "description": "The date and time when the enrollment occurred.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the enrollment (e.g., 'confirmed', 'cancelled', 'completed')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the enrollment was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the enrollment was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "workshopId",
+        "enrollmentDate",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserReview": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserReview",
+      "type": "object",
+      "description": "A review and rating left by a Client or Student for a Talent Creator.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserReview entity."
+        },
+        "reviewerId": {
+          "type": "string",
+          "description": "Reference to the User who submitted the review. (Relationship: User 1:N UserReview)"
+        },
+        "reviewedTalentCreatorProfileId": {
+          "type": "string",
+          "description": "Reference to the TalentCreatorProfile being reviewed. (Relationship: TalentCreatorProfile 1:N UserReview)"
+        },
+        "jobRequestId": {
+          "type": "string",
+          "description": "Optional: Reference to the JobRequest this review is associated with. (Relationship: JobRequest 1:1 UserReview)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The star rating given (1-5)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The written review comment."
+        },
+        "reviewDate": {
+          "type": "string",
+          "description": "The date and time when the review was submitted.",
+          "format": "date-time"
+        },
+        "isApproved": {
+          "type": "boolean",
+          "description": "Indicates if the review has been approved by an admin for public display."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the review was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the review was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "reviewerId",
+        "reviewedTalentCreatorProfileId",
+        "rating",
+        "reviewDate",
+        "isApproved",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WorkshopReview": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WorkshopReview",
+      "type": "object",
+      "description": "A review and rating left by a Student for a Workshop they attended.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WorkshopReview entity."
+        },
+        "reviewerId": {
+          "type": "string",
+          "description": "Reference to the User (Student) who submitted the review. (Relationship: User 1:N WorkshopReview)"
+        },
+        "reviewedWorkshopId": {
+          "type": "string",
+          "description": "Reference to the Workshop being reviewed. (Relationship: Workshop 1:N WorkshopReview)"
+        },
+        "enrollmentId": {
+          "type": "string",
+          "description": "Reference to the Enrollment record for context. (Relationship: Enrollment 1:1 WorkshopReview)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The star rating given (1-5)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The written review comment."
+        },
+        "reviewDate": {
+          "type": "string",
+          "description": "The date and time when the review was submitted.",
+          "format": "date-time"
+        },
+        "isApproved": {
+          "type": "boolean",
+          "description": "Indicates if the review has been approved by an admin for public display."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the review was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the review was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "reviewerId",
+        "reviewedWorkshopId",
+        "enrollmentId",
+        "rating",
+        "reviewDate",
+        "isApproved",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Conversation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Conversation",
+      "type": "object",
+      "description": "Represents a private message conversation between two or more users.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Conversation entity."
+        },
+        "participantIds": {
+          "type": "array",
+          "description": "An array of User IDs participating in this conversation. (Relationship: User N:N Conversation)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastMessageTimestamp": {
+          "type": "string",
+          "description": "The timestamp of the most recent message in the conversation.",
+          "format": "date-time"
+        },
+        "jobRequestId": {
+          "type": "string",
+          "description": "Optional: Reference to a JobRequest if this conversation is related to a specific job. (Relationship: JobRequest 1:1 Conversation)"
+        },
+        "workshopId": {
+          "type": "string",
+          "description": "Optional: Reference to a Workshop if this conversation is related to a specific workshop. (Relationship: Workshop 1:1 Conversation)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the conversation was initiated.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the conversation was last updated (e.g., new message).",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "participantIds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Message": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Message",
+      "type": "object",
+      "description": "An individual message within a Conversation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Message entity."
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Reference to the Conversation this message belongs to. (Relationship: Conversation 1:N Message)"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to the User who sent this message. (Relationship: User 1:N Message)"
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The date and time when the message was sent.",
+          "format": "date-time"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates if the message has been read by its recipient(s)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the message was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the message was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "conversationId",
+        "senderId",
+        "content",
+        "timestamp",
+        "isRead",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Stores notifications generated by the system for users, such as new messages, job requests, or workshop enrollments.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Notification entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User to whom this notification is directed. (Relationship: User 1:N Notification)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of notification (e.g., 'jobRequest', 'jobAccepted', 'workshopEnrollment', 'newMessage', 'newReview', 'adminMessage', 'systemAlert')."
+        },
+        "message": {
+          "type": "string",
+          "description": "The human-readable message content of the notification."
+        },
+        "linkUrl": {
+          "type": "string",
+          "description": "Optional URL that the notification links to (e.g., a specific job request page).",
+          "format": "uri"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates if the user has read or viewed this notification."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the notification was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the notification was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "type",
+        "message",
+        "isRead",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores core user profile information. Document ID is the user's Firebase Authentication UID. This collection is private to the owner.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching their Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A sentinel collection for database-based access control. The existence of a document at this path signifies that the corresponding user is an administrator. No specific schema is applied to the document content, only its existence matters.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user, matching their Firebase Authentication UID, indicating they have admin privileges."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/skillCategories/{skillCategoryId}",
+        "definition": {
+          "entityName": "SkillCategory",
+          "schema": {
+            "$ref": "#/backend/entities/SkillCategory"
+          },
+          "description": "Stores broad categories for skills and workshops. This collection is publicly readable and admin-managed.",
+          "params": [
+            {
+              "name": "skillCategoryId",
+              "description": "The unique ID of the skill category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/skills/{skillId}",
+        "definition": {
+          "entityName": "Skill",
+          "schema": {
+            "$ref": "#/backend/entities/Skill"
+          },
+          "description": "Stores specific skills that can be associated with talent creators or workshops. This collection is publicly readable and admin-managed.",
+          "params": [
+            {
+              "name": "skillId",
+              "description": "The unique ID of the skill."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/talentCreatorProfiles/{talentCreatorId}",
+        "definition": {
+          "entityName": "TalentCreatorProfile",
+          "schema": {
+            "$ref": "#/backend/entities/TalentCreatorProfile"
+          },
+          "description": "Stores public profiles for Talent Creators. The document ID (`talentCreatorId`) is the user's UID (userId). Includes denormalized 'userId' field (which is the document ID) for authorization independence, explicitly linking to the owner.",
+          "params": [
+            {
+              "name": "talentCreatorId",
+              "description": "The unique ID of the talent creator, matching their Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/talentCreatorProfiles/{talentCreatorId}/experiences/{experienceId}",
+        "definition": {
+          "entityName": "Experience",
+          "schema": {
+            "$ref": "#/backend/entities/Experience"
+          },
+          "description": "Details a professional experience for a Talent Creator. This is a subcollection under the Talent Creator's profile. Documents include denormalized 'userId' (which is the 'talentCreatorId' from the path) for authorization independence.",
+          "params": [
+            {
+              "name": "talentCreatorId",
+              "description": "The unique ID of the talent creator who owns this experience, matching their Firebase Authentication UID."
+            },
+            {
+              "name": "experienceId",
+              "description": "The unique ID of the experience entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/talentCreatorProfiles/{talentCreatorId}/portfolios/{portfolioId}",
+        "definition": {
+          "entityName": "Portfolio",
+          "schema": {
+            "$ref": "#/backend/entities/Portfolio"
+          },
+          "description": "Represents a project or showcase entry within a Talent Creator's portfolio. This is a subcollection under the Talent Creator's profile. Documents include denormalized 'userId' (which is the 'talentCreatorId' from the path) for authorization independence.",
+          "params": [
+            {
+              "name": "talentCreatorId",
+              "description": "The unique ID of the talent creator who owns this portfolio, matching their Firebase Authentication UID."
+            },
+            {
+              "name": "portfolioId",
+              "description": "The unique ID of the portfolio entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/talentCreatorProfiles/{talentCreatorId}/portfolios/{portfolioId}/assets/{portfolioAssetId}",
+        "definition": {
+          "entityName": "PortfolioAsset",
+          "schema": {
+            "$ref": "#/backend/entities/PortfolioAsset"
+          },
+          "description": "An individual asset (image, video, link) associated with a portfolio entry. Documents include denormalized 'userId' (which is the 'talentCreatorId' from the path) for authorization independence.",
+          "params": [
+            {
+              "name": "talentCreatorId",
+              "description": "The unique ID of the talent creator who owns this asset, matching their Firebase Authentication UID."
+            },
+            {
+              "name": "portfolioId",
+              "description": "The unique ID of the parent portfolio entry."
+            },
+            {
+              "name": "portfolioAssetId",
+              "description": "The unique ID of the portfolio asset."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/talentCreatorProfiles/{talentCreatorId}/services/{serviceId}",
+        "definition": {
+          "entityName": "Service",
+          "schema": {
+            "$ref": "#/backend/entities/Service"
+          },
+          "description": "Describes a specific service offered by a Talent Creator. This is a subcollection under the Talent Creator's profile. Documents include denormalized 'userId' (which is the 'talentCreatorId' from the path) for authorization independence.",
+          "params": [
+            {
+              "name": "talentCreatorId",
+              "description": "The unique ID of the talent creator who offers this service, matching their Firebase Authentication UID."
+            },
+            {
+              "name": "serviceId",
+              "description": "The unique ID of the service."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workshops/{workshopId}",
+        "definition": {
+          "entityName": "Workshop",
+          "schema": {
+            "$ref": "#/backend/entities/Workshop"
+          },
+          "description": "Defines classes, training sessions, or workshops. This collection is publicly discoverable. Documents include denormalized 'talentCreatorUserId' (the UID of the owner) for authorization independence and QAP compliance.",
+          "params": [
+            {
+              "name": "workshopId",
+              "description": "The unique ID of the workshop."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/jobRequests/{jobRequestId}",
+        "definition": {
+          "entityName": "JobRequest",
+          "schema": {
+            "$ref": "#/backend/entities/JobRequest"
+          },
+          "description": "Represents a request from a Client to hire a Talent Creator. Documents include denormalized 'talentCreatorUserId' (the UID of the talent creator) in addition to 'clientId' for authorization independence.",
+          "params": [
+            {
+              "name": "jobRequestId",
+              "description": "The unique ID of the job request."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/enrollments/{enrollmentId}",
+        "definition": {
+          "entityName": "Enrollment",
+          "schema": {
+            "$ref": "#/backend/entities/Enrollment"
+          },
+          "description": "Records a student's enrollment in a workshop. Documents include denormalized 'talentCreatorUserId' (the UID of the workshop creator) in addition to 'studentId' for authorization independence.",
+          "params": [
+            {
+              "name": "enrollmentId",
+              "description": "The unique ID of the enrollment record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userReviews/{userReviewId}",
+        "definition": {
+          "entityName": "UserReview",
+          "schema": {
+            "$ref": "#/backend/entities/UserReview"
+          },
+          "description": "Stores reviews and ratings left by Clients/Students for Talent Creators. Documents include denormalized 'reviewedTalentCreatorUserId' (the UID of the talent creator being reviewed) for authorization independence.",
+          "params": [
+            {
+              "name": "userReviewId",
+              "description": "The unique ID of the user review."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workshopReviews/{workshopReviewId}",
+        "definition": {
+          "entityName": "WorkshopReview",
+          "schema": {
+            "$ref": "#/backend/entities/WorkshopReview"
+          },
+          "description": "Stores reviews and ratings left by Students for Workshops. Documents include denormalized 'reviewedWorkshopCreatorUserId' (the UID of the workshop's creator) for authorization independence.",
+          "params": [
+            {
+              "name": "workshopReviewId",
+              "description": "The unique ID of the workshop review."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}",
+        "definition": {
+          "entityName": "Conversation",
+          "schema": {
+            "$ref": "#/backend/entities/Conversation"
+          },
+          "description": "Represents a private message conversation. 'participantIds' acts as a membership map for authorization.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique ID of the conversation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/conversations/{conversationId}/messages/{messageId}",
+        "definition": {
+          "entityName": "Message",
+          "schema": {
+            "$ref": "#/backend/entities/Message"
+          },
+          "description": "An individual message within a conversation. Documents include denormalized 'conversationParticipantIds' (copied from the parent conversation) for authorization independence.",
+          "params": [
+            {
+              "name": "conversationId",
+              "description": "The unique ID of the parent conversation."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique ID of the message."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Stores notifications for a specific user. This is a subcollection under the user's private profile. 'userId' is implicit in the path for authorization.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user to whom this notification is directed."
+            },
+            {
+              "name": "notificationId",
+              "description": "The unique ID of the notification."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for TalentHub is designed with a strong emphasis on Authorization Independence and Query-as-Permission (QAP) principles, ensuring robust security rules and efficient data access. The core strategy revolves around judicious denormalization of authorization-critical fields and structural segregation of data based on its security posture.\n\n**Authorization Independence (Denormalization Strategy):**\nTo eliminate the need for costly and complex `get()` calls in security rules, crucial ownership and membership information is denormalized into every document where it's needed for access control. This means: \n*   For user-specific subcollections (like a Talent Creator's experiences, portfolios, services), the owning `userId` is directly embedded within each document. For instance, an `Experience` document stored under `/talentCreatorProfiles/{talentCreatorId}/experiences/{experienceId}` will contain a `userId` field (equal to `talentCreatorId`) allowing direct verification of ownership.\n*   Collaborative entities like `JobRequest` and `Enrollment` store the `userId` of both involved parties (`clientId` and `talentCreatorUserId` for JobRequest; `studentId` and `talentCreatorUserId` for Enrollment). This allows a single document to contain all necessary UIDs for access checks without fetching related `User` or `TalentCreatorProfile` documents.\n*   Similarly, `UserReview` and `WorkshopReview` documents include the `userId` of the talent creator/workshop creator being reviewed (`reviewedTalentCreatorUserId`, `reviewedWorkshopCreatorUserId`) in addition to the `reviewerId`. This allows for explicit ownership checks for review approval or moderation.\n*   `Message` documents within a `Conversation` subcollection denormalize the `conversationParticipantIds` array from their parent `Conversation` document. This allows security rules for messages to verify `request.auth.uid` against the `conversationParticipantIds` directly, without performing a `get()` on the parent `Conversation` document.\n\n**QAPs (Structural Segregation and Denormalization):**\nTo support secure `list` operations without relying on filtering in rules (which can lead to insecure results), data is segregated based on its access requirements:\n*   **Publicly Discoverable Data:** `SkillCategories`, `Skills`, `TalentCreatorProfiles`, and `Workshops` are stored in top-level collections (`/skillCategories`, `/skills`, `/talentCreatorProfiles`, `/workshops`). These collections have broad public read access, with write access restricted to administrators or the `userId` specified within the document (e.g., `talentCreatorUserId` for `Workshops`). This allows clients to perform simple `list` queries to discover talents and workshops without security rule filters.\n*   **Private User Data:** `/users/{userId}` is a private collection, accessible only by the authenticated user (`request.auth.uid`). Subcollections like `/users/{userId}/notifications/{notificationId}` follow this pattern, ensuring notifications are private to the recipient.\n*   **Collaborative Data:** `JobRequests`, `Enrollments`, `UserReviews`, `WorkshopReviews`, and `Conversations` are also top-level collections. While publicly listable in some contexts (e.g., reviews), read/write access is tightly controlled by the denormalized `userId` fields or `participantIds` arrays, ensuring only authorized parties can access or modify them.\n*   **Nested User-Owned Public Data:** `Experience`, `Portfolio`, `Service`, and `PortfolioAsset` documents are stored as subcollections under `/talentCreatorProfiles/{talentCreatorId}/`. While hierarchically structured, the denormalized `userId` within each document ensures that rules can verify ownership atomically. These are designed to be publicly readable as part of a talent creator's public profile.\n\n**DBAC (Database-Based Access Control):**\nUser roles are managed within the `User` document's `roles` array. For global roles like 'Admin', a separate collection `/roles_admin/{userId}` is used. The mere existence of a document at `/roles_admin/$(request.auth.uid)` grants admin privileges, enabling efficient existence checks in security rules.\n\nThis architecture prioritizes atomic authorization checks, clear ownership, and scalable querying, leading to a secure, performant, and easily debuggable Firestore implementation for TalentHub."
+  }
+}

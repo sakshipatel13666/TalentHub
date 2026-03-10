@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, User, Bell, MessageSquare } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Menu, User, Bell, MessageSquare, Loader2 } from 'lucide-react';
+import { useUser, useAuth } from '@/firebase';
+import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
+import { signOut } from 'firebase/auth';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -13,7 +15,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock auth state
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
+  const handleJoinNow = () => {
+    initiateAnonymousSignIn(auth);
+  };
+
+  const handleLogout = () => {
+    signOut(auth);
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -39,10 +50,12 @@ export function Navbar() {
             />
           </div>
 
-          {!isLoggedIn ? (
+          {isUserLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          ) : !user ? (
             <>
-              <Button variant="ghost" className="hidden sm:flex" onClick={() => setIsLoggedIn(true)}>Log in</Button>
-              <Button className="rounded-full px-6" onClick={() => setIsLoggedIn(true)}>Join Now</Button>
+              <Button variant="ghost" className="hidden sm:flex" onClick={handleJoinNow}>Log in</Button>
+              <Button className="rounded-full px-6" onClick={handleJoinNow}>Join Now</Button>
             </>
           ) : (
             <div className="flex items-center gap-3">
@@ -56,22 +69,26 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full overflow-hidden border">
-                    <User className="h-5 w-5" />
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt={user.displayName || 'User'} className="h-full w-full object-cover" />
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="flex items-center gap-2 p-2">
                     <div className="h-8 w-8 rounded-full talent-gradient"></div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">Alex Rivera</span>
-                      <span className="text-xs text-muted-foreground">Client Profile</span>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-sm font-medium truncate">{user.displayName || 'Member'}</span>
+                      <span className="text-xs text-muted-foreground truncate">{user.email || 'Anonymous'}</span>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard/settings">Settings</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsLoggedIn(false)} className="text-destructive">Log out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">Log out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

@@ -16,6 +16,9 @@ import { doc, collection, query, orderBy } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 
 export default function ProfilePage() {
@@ -330,6 +333,10 @@ export default function ProfilePage() {
         {/* Video Playback Modal */}
         <Dialog open={!!playingVideo} onOpenChange={() => setPlayingVideo(null)}>
           <DialogContent className="max-w-4xl p-0 bg-black border-none rounded-3xl overflow-hidden aspect-video flex flex-col items-center justify-center">
+            <DialogHeader className="sr-only">
+              <DialogTitle>{playingVideo?.title || 'Video Player'}</DialogTitle>
+              <DialogDescription>Watching talent demonstration video</DialogDescription>
+            </DialogHeader>
              <Button 
               variant="ghost" 
               size="icon" 

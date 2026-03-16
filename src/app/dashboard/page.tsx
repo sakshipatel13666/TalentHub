@@ -3,25 +3,44 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Users, 
   Briefcase, 
   Calendar, 
   DollarSign, 
   Star, 
-  TrendingUp, 
-  Clock, 
   CheckCircle2,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
-import { TALENTS, WORKSHOPS } from '@/lib/mock-data';
+import { WORKSHOPS } from '@/lib/mock-data';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 export default function DashboardPage() {
-  // Mock current role
-  const userRole = 'talent'; // can be 'talent', 'client', or 'student'
+  const { user, isUserLoading } = useUser();
+  const db = useFirestore();
+
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
+
+  if (isUserLoading || isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  const displayName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,11 +49,13 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-4xl font-headline font-bold">Welcome back, Sarah</h1>
+            <h1 className="text-4xl font-headline font-bold">Welcome back, {displayName}</h1>
             <p className="text-muted-foreground">Here's what's happening with your account today.</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="rounded-full">View Public Profile</Button>
+            <Button variant="outline" className="rounded-full" asChild>
+              <Link href={user ? `/profile/${user.uid}` : '#'}>View Public Profile</Link>
+            </Button>
             <Button className="rounded-full px-8 gap-2">
               <Plus className="h-4 w-4" /> Create Workshop
             </Button>
@@ -128,7 +149,7 @@ export default function DashboardPage() {
                         <p className="text-sm font-bold">John Doe</p>
                         <span className="text-[10px] text-muted-foreground uppercase">10m ago</span>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">Hey Sarah, let's discuss the final mockups for the checkout flow...</p>
+                      <p className="text-xs text-muted-foreground truncate">Hey, let's discuss the final mockups for the checkout flow...</p>
                     </div>
                   </div>
                 ))}

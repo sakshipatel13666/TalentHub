@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,13 +13,15 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
-import { User, Bell, Loader2, Save, ArrowLeft } from 'lucide-react';
+import { User, Bell, Loader2, Save, ArrowLeft, Camera, Upload } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -57,6 +59,21 @@ export default function SettingsPage() {
 
   const handleSwitchChange = (name: string, checked: boolean) => {
     setFormData(prev => ({ ...prev, [name]: checked }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, profilePhotoUrl: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSave = () => {
@@ -149,24 +166,36 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-8 items-start">
-                  <div className="relative h-24 w-24 rounded-3xl overflow-hidden bg-secondary flex items-center justify-center border-4 border-white shadow-md shrink-0">
+                  <div 
+                    onClick={triggerFileInput}
+                    className="group relative h-32 w-32 rounded-3xl overflow-hidden bg-secondary flex items-center justify-center border-4 border-white shadow-md shrink-0 cursor-pointer"
+                  >
                     {formData.profilePhotoUrl ? (
-                      <img src={formData.profilePhotoUrl} alt="Avatar" className="h-full w-full object-cover" />
+                      <img src={formData.profilePhotoUrl} alt="Avatar" className="h-full w-full object-cover transition-opacity group-hover:opacity-50" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center talent-gradient text-white text-2xl font-bold">
-                        {user.email?.[0].toUpperCase()}
+                      <div className="h-full w-full flex items-center justify-center talent-gradient text-white text-3xl font-bold group-hover:opacity-50">
+                        {formData.name?.[0]?.toUpperCase() || user.email?.[0].toUpperCase()}
                       </div>
                     )}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                      <Camera className="h-8 w-8 text-white" />
+                    </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange} 
+                      className="hidden" 
+                      accept="image/*"
+                    />
                   </div>
                   <div className="flex-1 space-y-4 w-full">
                     <div className="space-y-2">
                       <Label htmlFor="name">Display Name</Label>
                       <Input id="name" name="name" value={formData.name} onChange={handleInputChange} className="rounded-xl h-12" placeholder="Your full name" />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="profilePhotoUrl">Profile Photo URL</Label>
-                      <Input id="profilePhotoUrl" name="profilePhotoUrl" value={formData.profilePhotoUrl} onChange={handleInputChange} placeholder="https://example.com/photo.jpg" className="rounded-xl h-12" />
-                    </div>
+                    <Button variant="outline" size="sm" onClick={triggerFileInput} className="rounded-xl gap-2">
+                      <Upload className="h-4 w-4" /> Change Profile Picture
+                    </Button>
                   </div>
                 </div>
 

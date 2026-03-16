@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect } from 'react';
@@ -9,7 +8,7 @@ import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 /**
  * AuthSync is a headless component that synchronizes the Firebase Authentication
  * user state with a corresponding document in the 'users' Firestore collection.
- * It also seeds initial default data like shows and workshops for a better first-time experience.
+ * It also seeds initial default data like shows, workshops, and notifications for a better first-time experience.
  */
 export function AuthSync() {
   const { user, isUserLoading } = useUser();
@@ -34,7 +33,7 @@ export function AuthSync() {
       { merge: true }
     );
 
-    // Seed default shows with fixed IDs to prevent duplicates
+    // Seed default shows
     const defaultShows = [
       {
         id: 'default-show-1',
@@ -73,7 +72,7 @@ export function AuthSync() {
       );
     });
 
-    // Seed default workshops with fixed IDs
+    // Seed default workshops
     const defaultWorkshops = [
       {
         id: 'default-ws-1',
@@ -106,6 +105,37 @@ export function AuthSync() {
           userId: user.uid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
+
+    // Seed default notifications
+    const defaultNotifications = [
+      {
+        id: 'welcome-notification',
+        title: 'Welcome to TalentHub!',
+        message: 'Start by setting up your profile and adding your first show.',
+        read: false,
+        type: 'info',
+      },
+      {
+        id: 'seed-notification-1',
+        title: 'New Booking Request',
+        message: 'You have a new inquiry for "Acoustic Night Live".',
+        read: false,
+        type: 'success',
+      }
+    ];
+
+    defaultNotifications.forEach((notification) => {
+      const notificationRef = doc(db, 'users', user.uid, 'notifications', notification.id);
+      setDocumentNonBlocking(
+        notificationRef,
+        {
+          ...notification,
+          userId: user.uid,
+          createdAt: serverTimestamp(),
         },
         { merge: true }
       );

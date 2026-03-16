@@ -1,25 +1,47 @@
-
 "use client";
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, User, Bell, MessageSquare, Loader2 } from 'lucide-react';
-import { useUser, useAuth } from '@/firebase';
+import { Search, Menu, User, Bell, MessageSquare, Loader2, Check } from 'lucide-react';
+import { useUser, useAuth, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { collection, query, orderBy, limit, doc } from 'firebase/firestore';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger,
-  DropdownMenuSeparator 
+  DropdownMenuSeparator,
+  DropdownMenuLabel
 } from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function Navbar() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
+
+  // Fetch notifications
+  const notificationsQuery = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'users', user.uid, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(10)
+    );
+  }, [db, user]);
+
+  const { data: notifications } = useCollection(notificationsQuery);
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
 
   const handleLogout = () => {
     signOut(auth);
+  };
+
+  const markAsRead = (id: string) => {
+    if (!user || !db) return;
+    updateDocumentNonBlocking(doc(db, 'users', user.uid, 'notifications', id), { read: true });
   };
 
   return (
@@ -59,13 +81,60 @@ export function Navbar() {
             </>
           ) : (
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-accent border-2 border-background"></span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-accent border-2 border-background animate-pulse"></span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 p-0 rounded-2xl overflow-hidden shadow-2xl border-none">
+                  <DropdownMenuLabel className="p-4 bg-muted/50 font-headline font-bold flex justify-between items-center">
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="text-[10px] bg-accent text-white px-2 py-0.5 rounded-full">
+                        {unreadCount} New
+                      </span>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="m-0" />
+                  <ScrollArea className="h-80">
+                    {notifications && notifications.length > 0 ? (
+                      notifications.map((notification) => (
+                        <DropdownMenuItem 
+                          key={notification.id} 
+                          className="p-4 focus:bg-accent/5 cursor-pointer border-b last:border-0"
+                          onClick={() => markAsRead(notification.id)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`h-2 w-2 mt-1.5 rounded-full shrink-0 ${notification.read ? 'bg-muted' : 'bg-accent'}`} />
+                            <div className="flex-1 space-y-1">
+                              <p className={`text-sm font-bold leading-none ${notification.read ? 'text-muted-foreground' : 'text-foreground'}`}>
+                                {notification.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {notification.message}
+                              </p>
+                            </div>
+                          </div>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <div className="p-12 text-center text-muted-foreground">
+                        <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                        <p className="text-sm font-medium">No notifications yet</p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button variant="ghost" size="icon">
                 <MessageSquare className="h-5 w-5" />
               </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full overflow-hidden border">
@@ -78,19 +147,21 @@ export function Navbar() {
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex items-center gap-2 p-2">
-                    <div className="h-8 w-8 rounded-full talent-gradient"></div>
+                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-none">
+                  <div className="flex items-center gap-3 p-3">
+                    <div className="h-10 w-10 rounded-full talent-gradient flex items-center justify-center text-white font-bold">
+                       {user.email?.[0].toUpperCase() || 'U'}
+                    </div>
                     <div className="flex flex-col overflow-hidden">
-                      <span className="text-sm font-medium truncate">{user.displayName || 'Member'}</span>
-                      <span className="text-xs text-muted-foreground truncate">{user.email || 'Anonymous'}</span>
+                      <span className="text-sm font-bold truncate">{user.displayName || 'Member'}</span>
+                      <span className="text-[10px] text-muted-foreground truncate uppercase tracking-tighter">{user.email || 'Anonymous'}</span>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/dashboard/settings">Settings</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-xl cursor-pointer py-3"><Link href="/dashboard">Dashboard</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-xl cursor-pointer py-3"><Link href="/dashboard/settings">Settings</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">Log out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive rounded-xl cursor-pointer py-3 font-bold">Log out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

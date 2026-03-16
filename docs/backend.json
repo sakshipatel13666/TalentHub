@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "User": {
@@ -55,6 +54,22 @@
       },
       "required": ["id", "userId", "title", "category", "price", "date", "createdAt", "updatedAt"]
     },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "A notification for the user.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "read": { "type": "boolean" },
+        "type": { "type": "string", "enum": ["info", "success", "warning", "error"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "message", "read", "createdAt"]
+    },
     "SkillCategory": {
       "title": "SkillCategory",
       "type": "object",
@@ -91,6 +106,14 @@
           "entityName": "Workshop",
           "schema": { "$ref": "#/backend/entities/Workshop" },
           "description": "Workshops managed by a specific user."
+        }
+      },
+      {
+        "path": "/users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": { "$ref": "#/backend/entities/Notification" },
+          "description": "User specific notifications."
         }
       }
     ]

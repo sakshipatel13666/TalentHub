@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video } from 'lucide-react';
+import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video as VideoIcon } from 'lucide-react';
 import { useState } from 'react';
 import { aiContentAssistant } from '@/ai/flows/ai-content-assistant';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
@@ -170,22 +170,22 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {videos && videos.length > 0 ? (
                     videos.map((vid) => (
-                      <div key={vid.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border/50 group">
-                        <div className="relative aspect-video bg-muted flex items-center justify-center">
+                      <div key={vid.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border/50 group flex flex-col">
+                        <div className="relative aspect-video bg-black flex items-center justify-center">
                           {vid.videoUrl.startsWith('data:video') ? (
                              <video 
                               src={vid.videoUrl} 
                               controls 
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-contain"
                             />
                           ) : (
-                            <>
-                              <Play className="h-12 w-12 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
-                              <div className="absolute inset-0 bg-black/5" />
-                            </>
+                            <div className="flex flex-col items-center justify-center gap-2">
+                              <Play className="h-12 w-12 text-white opacity-50 group-hover:opacity-100 transition-opacity" />
+                              <span className="text-xs text-white/50 uppercase font-bold">External Video</span>
+                            </div>
                           )}
                         </div>
-                        <div className="p-4">
+                        <div className="p-4 border-t border-border/50 bg-white">
                           <h4 className="font-bold mb-1 truncate">{vid.title}</h4>
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{vid.description || 'No description provided.'}</p>
                           {!vid.videoUrl.startsWith('data:video') && (
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                     ))
                   ) : (
                     <div className="col-span-full py-12 text-center text-muted-foreground border-2 border-dashed rounded-3xl bg-muted/20">
-                      <Video className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <VideoIcon className="h-12 w-12 mx-auto mb-3 opacity-20" />
                       <p>No demonstration videos available yet.</p>
                     </div>
                   )}

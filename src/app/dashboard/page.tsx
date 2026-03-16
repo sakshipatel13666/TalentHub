@@ -16,7 +16,7 @@ import {
   MapPin,
   Edit2,
   Trash2,
-  Video,
+  Video as VideoIcon,
   Play,
   Upload,
   Check
@@ -383,29 +383,40 @@ export default function DashboardPage() {
                 {isVideosLoading ? (
                   <div className="p-12 flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>
                 ) : myVideos && myVideos.length > 0 ? (
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid sm:grid-cols-2 gap-6">
                     {myVideos.map(vid => (
-                      <div key={vid.id} className="relative group rounded-2xl overflow-hidden bg-muted aspect-video border border-border/50">
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-all">
-                          <Play className="h-10 w-10 text-white fill-white" />
+                      <div key={vid.id} className="relative group rounded-3xl overflow-hidden bg-muted aspect-video border border-border/50 flex flex-col">
+                        <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+                          {vid.videoUrl.startsWith('data:video') ? (
+                            <video 
+                              src={vid.videoUrl} 
+                              controls 
+                              className="h-full w-full object-contain"
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center gap-2">
+                              <Play className="h-10 w-10 text-white opacity-50" />
+                              <span className="text-[10px] text-white/50 uppercase font-bold">External Link</span>
+                            </div>
+                          )}
+                          <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/90" onClick={() => handleOpenEditVideoDialog(vid)}>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteVideo(vid.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/90" onClick={() => handleOpenEditVideoDialog(vid)}>
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteVideo(vid.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                          <h4 className="text-white font-bold truncate text-sm">{vid.title}</h4>
+                        <div className="p-3 bg-white border-t border-border/50">
+                          <h4 className="font-bold truncate text-sm">{vid.title}</h4>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="p-12 text-center text-muted-foreground">
-                    <Video className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                    <VideoIcon className="h-12 w-12 mx-auto mb-3 opacity-20" />
                     <p>No videos added to your portfolio yet.</p>
                     <Button variant="link" onClick={handleOpenAddVideoDialog} className="mt-2">Upload your first talent video</Button>
                   </div>

@@ -8,11 +8,15 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video as VideoIcon } from 'lucide-react';
+import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video as VideoIcon, X } from 'lucide-react';
 import { useState } from 'react';
 import { aiContentAssistant } from '@/ai/flows/ai-content-assistant';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, orderBy } from 'firebase/firestore';
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -48,6 +52,7 @@ export default function ProfilePage() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedBio, setGeneratedBio] = useState<string | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<any>(null);
 
   const handleGenerateBio = async () => {
     setIsGenerating(true);
@@ -170,26 +175,33 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {videos && videos.length > 0 ? (
                     videos.map((vid) => (
-                      <div key={vid.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border/50 group flex flex-col">
-                        <div className="relative aspect-video bg-black flex items-center justify-center">
+                      <div 
+                        key={vid.id} 
+                        onClick={() => setPlayingVideo(vid)}
+                        className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border/50 group flex flex-col cursor-pointer"
+                      >
+                        <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
                           {vid.videoUrl.startsWith('data:video') ? (
                              <video 
                               src={vid.videoUrl} 
-                              controls 
-                              className="h-full w-full object-contain"
+                              className="h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
                             />
                           ) : (
                             <div className="flex flex-col items-center justify-center gap-2">
-                              <Play className="h-12 w-12 text-white opacity-50 group-hover:opacity-100 transition-opacity" />
-                              <span className="text-xs text-white/50 uppercase font-bold">External Video</span>
+                              <VideoIcon className="h-12 w-12 text-white opacity-50" />
                             </div>
                           )}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-16 w-16 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play className="h-8 w-8 ml-1" />
+                            </div>
+                          </div>
                         </div>
                         <div className="p-4 border-t border-border/50 bg-white">
                           <h4 className="font-bold mb-1 truncate">{vid.title}</h4>
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{vid.description || 'No description provided.'}</p>
                           {!vid.videoUrl.startsWith('data:video') && (
-                            <Button variant="outline" size="sm" className="w-full rounded-xl gap-2" asChild>
+                            <Button variant="outline" size="sm" className="w-full rounded-xl gap-2" asChild onClick={(e) => e.stopPropagation()}>
                               <a href={vid.videoUrl} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="h-3 w-3" /> Watch Publicly
                               </a>
@@ -314,6 +326,28 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Video Playback Modal */}
+        <Dialog open={!!playingVideo} onOpenChange={() => setPlayingVideo(null)}>
+          <DialogContent className="max-w-4xl p-0 bg-black border-none rounded-3xl overflow-hidden aspect-video flex flex-col items-center justify-center">
+             <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-4 right-4 text-white z-50 hover:bg-white/20"
+              onClick={() => setPlayingVideo(null)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            {playingVideo && (
+              <video 
+                src={playingVideo.videoUrl} 
+                controls 
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

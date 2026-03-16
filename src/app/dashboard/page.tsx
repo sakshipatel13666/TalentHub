@@ -19,7 +19,8 @@ import {
   Video as VideoIcon,
   Play,
   Upload,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -119,6 +120,9 @@ export default function DashboardPage() {
     videoUrl: '',
     description: ''
   });
+
+  // Video Playback State
+  const [playingVideo, setPlayingVideo] = useState<any>(null);
 
   if (isUserLoading || (user && isProfileLoading)) {
     return (
@@ -249,7 +253,8 @@ export default function DashboardPage() {
     setIsVideoDialogOpen(true);
   };
 
-  const handleOpenEditVideoDialog = (vid: any) => {
+  const handleOpenEditVideoDialog = (e: React.MouseEvent, vid: any) => {
+    e.stopPropagation();
     setEditingVideo(vid);
     setVideoForm({
       title: vid.title,
@@ -285,7 +290,8 @@ export default function DashboardPage() {
     setIsVideoDialogOpen(false);
   };
 
-  const handleDeleteVideo = (vidId: string) => {
+  const handleDeleteVideo = (e: React.MouseEvent, vidId: string) => {
+    e.stopPropagation();
     if (!db || !user) return;
     deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'videos', vidId));
   };
@@ -385,25 +391,32 @@ export default function DashboardPage() {
                 ) : myVideos && myVideos.length > 0 ? (
                   <div className="grid sm:grid-cols-2 gap-6">
                     {myVideos.map(vid => (
-                      <div key={vid.id} className="relative group rounded-3xl overflow-hidden bg-muted aspect-video border border-border/50 flex flex-col">
+                      <div 
+                        key={vid.id} 
+                        onClick={() => setPlayingVideo(vid)}
+                        className="relative group rounded-3xl overflow-hidden bg-muted aspect-video border border-border/50 flex flex-col cursor-pointer"
+                      >
                         <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
                           {vid.videoUrl.startsWith('data:video') ? (
                             <video 
                               src={vid.videoUrl} 
-                              controls 
-                              className="h-full w-full object-contain"
+                              className="h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
                             />
                           ) : (
                             <div className="flex flex-col items-center justify-center gap-2">
-                              <Play className="h-10 w-10 text-white opacity-50" />
-                              <span className="text-[10px] text-white/50 uppercase font-bold">External Link</span>
+                              <VideoIcon className="h-10 w-10 text-white opacity-50" />
                             </div>
                           )}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-14 w-14 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play className="h-6 w-6 ml-1" />
+                            </div>
+                          </div>
                           <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/90" onClick={() => handleOpenEditVideoDialog(vid)}>
+                            <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/90" onClick={(e) => handleOpenEditVideoDialog(e, vid)}>
                               <Edit2 className="h-4 w-4" />
                             </Button>
-                            <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteVideo(vid.id)}>
+                            <Button variant="destructive" size="icon" className="h-8 w-8" onClick={(e) => handleDeleteVideo(e, vid.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -587,7 +600,7 @@ export default function DashboardPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Video Dialog */}
+        {/* Video Upload Dialog */}
         <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
           <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
             <DialogHeader>
@@ -631,6 +644,28 @@ export default function DashboardPage() {
               <Button type="button" variant="outline" onClick={() => setIsVideoDialogOpen(false)} className="rounded-xl">Cancel</Button>
               <Button type="button" onClick={handleSaveVideo} className="rounded-xl px-8">Save Video</Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Video Playback Modal */}
+        <Dialog open={!!playingVideo} onOpenChange={() => setPlayingVideo(null)}>
+          <DialogContent className="max-w-4xl p-0 bg-black border-none rounded-3xl overflow-hidden aspect-video flex flex-col items-center justify-center">
+             <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-4 right-4 text-white z-50 hover:bg-white/20"
+              onClick={() => setPlayingVideo(null)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            {playingVideo && (
+              <video 
+                src={playingVideo.videoUrl} 
+                controls 
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            )}
           </DialogContent>
         </Dialog>
       </main>

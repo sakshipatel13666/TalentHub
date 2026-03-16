@@ -1,27 +1,34 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 /**
  * AuthSync is a headless component that synchronizes the Firebase Authentication
  * user state with a corresponding document in the 'users' Firestore collection.
- * It also seeds initial default data like shows, workshops, and notifications for a better first-time experience.
+ * It seeds initial default data ONLY if the user profile does not already exist.
  */
 export function AuthSync() {
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
 
-  useEffect(() => {
-    if (isUserLoading || !user || !db) return;
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
 
-    const userRef = doc(db, 'users', user.uid);
-    
+  const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
+
+  useEffect(() => {
+    // Only proceed if auth is ready, profile check is finished, and NO profile exists yet.
+    if (isUserLoading || isProfileLoading || !user || !db || profile) return;
+
+    // This block only runs for a brand new user profile
     // Update or create the core user profile
     setDocumentNonBlocking(
-      userRef,
+      userRef!,
       {
         id: user.uid,
         name: user.displayName || 'Anonymous User',
@@ -142,9 +149,7 @@ export function AuthSync() {
       );
     });
 
-    // Default videos have been removed per user request to start with a clean portfolio.
-
-  }, [user, isUserLoading, db]);
+  }, [user, isUserLoading, isProfileLoading, profile, db, userRef]);
 
   return null;
 }

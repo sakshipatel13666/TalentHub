@@ -16,7 +16,9 @@ import {
   MapPin,
   Edit2,
   Trash2,
-  BookOpen
+  Video,
+  Play,
+  ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -33,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -60,6 +63,11 @@ export default function DashboardPage() {
     return collection(db, 'users', user.uid, 'workshops');
   }, [db, user]);
 
+  const videosCollectionRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'videos');
+  }, [db, user]);
+
   const showsQuery = useMemoFirebase(() => {
     if (!showsCollectionRef || !user) return null;
     return query(showsCollectionRef, orderBy('date', 'asc'));
@@ -70,9 +78,15 @@ export default function DashboardPage() {
     return query(workshopsCollectionRef, orderBy('date', 'asc'));
   }, [workshopsCollectionRef, user]);
 
+  const videosQuery = useMemoFirebase(() => {
+    if (!videosCollectionRef || !user) return null;
+    return query(videosCollectionRef, orderBy('createdAt', 'desc'));
+  }, [videosCollectionRef, user]);
+
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
   const { data: upcomingShows, isLoading: isShowsLoading } = useCollection(showsQuery);
   const { data: myWorkshops, isLoading: isWorkshopsLoading } = useCollection(workshopsQuery);
+  const { data: myVideos, isLoading: isVideosLoading } = useCollection(videosQuery);
 
   // Show Dialog State
   const [isShowDialogOpen, setIsShowDialogOpen] = useState(false);
@@ -93,6 +107,15 @@ export default function DashboardPage() {
     price: '',
     date: '',
     maxParticipants: '20'
+  });
+
+  // Video Dialog State
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<any>(null);
+  const [videoForm, setVideoForm] = useState({
+    title: '',
+    videoUrl: '',
+    description: ''
   });
 
   if (isUserLoading || (user && isProfileLoading)) {
@@ -217,6 +240,43 @@ export default function DashboardPage() {
     deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'workshops', wsId));
   };
 
+  // Video Actions
+  const handleOpenAddVideoDialog = () => {
+    setEditingVideo(null);
+    setVideoForm({ title: '', videoUrl: '', description: '' });
+    setIsVideoDialogOpen(true);
+  };
+
+  const handleOpenEditVideoDialog = (vid: any) => {
+    setEditingVideo(vid);
+    setVideoForm({
+      title: vid.title,
+      videoUrl: vid.videoUrl,
+      description: vid.description || ''
+    });
+    setIsVideoDialogOpen(true);
+  };
+
+  const handleSaveVideo = () => {
+    if (!videosCollectionRef || !user || !db) return;
+    const videoData = {
+      ...videoForm,
+      userId: user.uid,
+      updatedAt: serverTimestamp()
+    };
+    if (editingVideo) {
+      updateDocumentNonBlocking(doc(db, 'users', user.uid, 'videos', editingVideo.id), videoData);
+    } else {
+      addDocumentNonBlocking(videosCollectionRef, { ...videoData, createdAt: serverTimestamp() });
+    }
+    setIsVideoDialogOpen(false);
+  };
+
+  const handleDeleteVideo = (vidId: string) => {
+    if (!db || !user) return;
+    deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'videos', vidId));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -246,6 +306,7 @@ export default function DashboardPage() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
+            {/* Shows Section */}
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
               <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
                 <CardTitle className="text-xl font-headline">Upcoming Shows</CardTitle>
@@ -297,6 +358,49 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Videos Portfolio Section */}
+            <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
+              <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
+                <CardTitle className="text-xl font-headline">My Talent Videos</CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleOpenAddVideoDialog} className="rounded-full gap-1">
+                  <Plus className="h-4 w-4" /> Add Video
+                </Button>
+              </CardHeader>
+              <CardContent className="p-6">
+                {isVideosLoading ? (
+                  <div className="p-12 flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                ) : myVideos && myVideos.length > 0 ? (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {myVideos.map(vid => (
+                      <div key={vid.id} className="relative group rounded-2xl overflow-hidden bg-muted aspect-video border border-border/50">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-all">
+                          <Play className="h-10 w-10 text-white fill-white" />
+                        </div>
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/90" onClick={() => handleOpenEditVideoDialog(vid)}>
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => handleDeleteVideo(vid.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                          <h4 className="text-white font-bold truncate text-sm">{vid.title}</h4>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-12 text-center text-muted-foreground">
+                    <Video className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                    <p>No videos added to your portfolio yet.</p>
+                    <Button variant="link" onClick={handleOpenAddVideoDialog} className="mt-2">Upload your first talent video</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Workshops Section */}
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
               <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
                 <CardTitle className="text-xl font-headline">My Workshops</CardTitle>
@@ -455,6 +559,34 @@ export default function DashboardPage() {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsWorkshopDialogOpen(false)} className="rounded-xl">Cancel</Button>
               <Button type="button" onClick={handleSaveWorkshop} className="rounded-xl px-8">Save Workshop</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Video Dialog */}
+        <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
+            <DialogHeader>
+              <DialogTitle>{editingVideo ? 'Edit Portfolio Video' : 'Add Portfolio Video'}</DialogTitle>
+              <DialogDescription>Provide a URL to showcase your talent publicly.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="vid-title">Video Title</Label>
+                <Input id="vid-title" placeholder="e.g. Live at The O2" value={videoForm.title} onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="vid-url">Video URL (Public Link)</Label>
+                <Input id="vid-url" placeholder="e.g. https://www.youtube.com/watch?v=..." value={videoForm.videoUrl} onChange={(e) => setVideoForm({ ...videoForm, videoUrl: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="vid-desc">Short Description (Optional)</Label>
+                <Textarea id="vid-desc" placeholder="Briefly describe what this video shows..." value={videoForm.description} onChange={(e) => setVideoForm({ ...videoForm, description: e.target.value })} className="rounded-xl resize-none" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsVideoDialogOpen(false)} className="rounded-xl">Cancel</Button>
+              <Button type="button" onClick={handleSaveVideo} className="rounded-xl px-8">Save Video</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

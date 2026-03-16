@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -29,6 +30,7 @@ export function AuthSync() {
         profilePhotoUrl: user.photoURL || '',
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(), 
+        roles: ['Creative'],
       },
       { merge: true }
     );
@@ -136,6 +138,36 @@ export function AuthSync() {
           ...notification,
           userId: user.uid,
           createdAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
+
+    // Seed default videos
+    const defaultVideos = [
+      {
+        id: 'default-vid-1',
+        title: 'Piano Performance Showcase',
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        description: 'A highlight reel of my recent solo piano performances in London.',
+      },
+      {
+        id: 'default-vid-2',
+        title: 'Modern UI Design Process',
+        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        description: 'Timelapse of my workflow using Figma and React.',
+      }
+    ];
+
+    defaultVideos.forEach((vid) => {
+      const vidRef = doc(db, 'users', user.uid, 'videos', vid.id);
+      setDocumentNonBlocking(
+        vidRef,
+        {
+          ...vid,
+          userId: user.uid,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         },
         { merge: true }
       );

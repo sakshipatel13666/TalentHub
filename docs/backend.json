@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -70,13 +71,21 @@
       },
       "required": ["id", "userId", "title", "message", "read", "createdAt"]
     },
-    "SkillCategory": {
-      "title": "SkillCategory",
+    "Video": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Video",
       "type": "object",
+      "description": "A portfolio video showcasing a user's talent.",
       "properties": {
         "id": { "type": "string" },
-        "name": { "type": "string" }
-      }
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "videoUrl": { "type": "string", "format": "uri" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "videoUrl", "createdAt", "updatedAt"]
     }
   },
   "auth": {
@@ -114,6 +123,14 @@
           "entityName": "Notification",
           "schema": { "$ref": "#/backend/entities/Notification" },
           "description": "User specific notifications."
+        }
+      },
+      {
+        "path": "/users/{userId}/videos/{videoId}",
+        "definition": {
+          "entityName": "Video",
+          "schema": { "$ref": "#/backend/entities/Video" },
+          "description": "Public talent demonstration videos."
         }
       }
     ]

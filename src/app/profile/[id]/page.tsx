@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Navbar } from '@/components/layout/Navbar';
@@ -7,13 +8,44 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2 } from 'lucide-react';
+import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video } from 'lucide-react';
 import { useState } from 'react';
 import { aiContentAssistant } from '@/ai/flows/ai-content-assistant';
+import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection, query, orderBy } from 'firebase/firestore';
 
 export default function ProfilePage() {
   const { id } = useParams();
-  const talent = TALENTS.find(t => t.id === id) || TALENTS[0];
+  const db = useFirestore();
+  const talentId = Array.isArray(id) ? id[0] : id;
+
+  const talentRef = useMemoFirebase(() => {
+    if (!db || !talentId) return null;
+    return doc(db, 'users', talentId);
+  }, [db, talentId]);
+
+  const videosRef = useMemoFirebase(() => {
+    if (!db || !talentId) return null;
+    return collection(db, 'users', talentId, 'videos');
+  }, [db, talentId]);
+
+  const videosQuery = useMemoFirebase(() => {
+    if (!videosRef) return null;
+    return query(videosRef, orderBy('createdAt', 'desc'));
+  }, [videosRef]);
+
+  const { data: profile } = useDoc(talentRef);
+  const { data: videos } = useCollection(videosQuery);
+
+  // Fallback to mock data if it matches, otherwise use profile data
+  const mockTalent = TALENTS.find(t => t.id === talentId) || TALENTS[0];
+  const talent = {
+    ...mockTalent,
+    name: profile?.name || mockTalent.name,
+    bio: profile?.bio || mockTalent.bio,
+    image: profile?.profilePhotoUrl || mockTalent.image,
+  };
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedBio, setGeneratedBio] = useState<string | null>(null);
 
@@ -126,13 +158,43 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <Tabs defaultValue="portfolio" className="w-full">
+            <Tabs defaultValue="videos" className="w-full">
               <TabsList className="bg-transparent border-b rounded-none h-12 p-0 gap-8 mb-8">
+                <TabsTrigger value="videos" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none text-base px-0 font-bold">Videos</TabsTrigger>
                 <TabsTrigger value="portfolio" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none text-base px-0 font-bold">Portfolio</TabsTrigger>
                 <TabsTrigger value="services" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none text-base px-0 font-bold">Services</TabsTrigger>
                 <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none text-base px-0 font-bold">Reviews</TabsTrigger>
               </TabsList>
               
+              <TabsContent value="videos" className="mt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {videos && videos.length > 0 ? (
+                    videos.map((vid) => (
+                      <div key={vid.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border/50 group">
+                        <div className="relative aspect-video bg-muted flex items-center justify-center">
+                          <Play className="h-12 w-12 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-black/5" />
+                        </div>
+                        <div className="p-4">
+                          <h4 className="font-bold mb-1 truncate">{vid.title}</h4>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{vid.description || 'No description provided.'}</p>
+                          <Button variant="outline" size="sm" className="w-full rounded-xl gap-2" asChild>
+                            <a href={vid.videoUrl} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-3 w-3" /> Watch Publicly
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full py-12 text-center text-muted-foreground border-2 border-dashed rounded-3xl bg-muted/20">
+                      <Video className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <p>No demonstration videos available yet.</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
               <TabsContent value="portfolio" className="mt-0">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {talent.portfolio.map((img, i) => (
@@ -213,7 +275,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 
-                <Button className="w-full h-14 rounded-2xl text-lg font-bold mb-4">Hire Sarah Jenkins</Button>
+                <Button className="w-full h-14 rounded-2xl text-lg font-bold mb-4">Hire {talent.name}</Button>
                 <Button variant="outline" className="w-full h-14 rounded-2xl text-lg font-bold">Contact Me</Button>
                 
                 <p className="text-center text-xs text-muted-foreground mt-6">
@@ -222,13 +284,13 @@ export default function ProfilePage() {
               </div>
 
               <div className="bg-primary/5 rounded-3xl p-8 border border-primary/10">
-                <h3 className="font-headline font-bold mb-4">Sarah's Classes</h3>
+                <h3 className="font-headline font-bold mb-4">{talent.name.split(' ')[0]}'s Classes</h3>
                 <div className="space-y-4">
                   <div className="group cursor-pointer">
                     <div className="flex gap-4 items-center">
                       <div className="h-16 w-16 rounded-xl bg-primary/20 shrink-0"></div>
                       <div>
-                        <p className="text-sm font-bold group-hover:text-primary transition-colors">UI/UX Basics for Devs</p>
+                        <p className="text-sm font-bold group-hover:text-primary transition-colors">Talent Masterclass</p>
                         <p className="text-xs text-muted-foreground">Next class: Oct 30</p>
                         <p className="text-xs font-bold text-primary mt-1">$49</p>
                       </div>

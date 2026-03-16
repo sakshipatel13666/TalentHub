@@ -49,9 +49,9 @@ export default function DashboardPage() {
   }, [db, user]);
 
   const showsQuery = useMemoFirebase(() => {
-    if (!showsCollectionRef) return null;
+    if (!showsCollectionRef || !user) return null;
     return query(showsCollectionRef, orderBy('date', 'asc'));
-  }, [showsCollectionRef]);
+  }, [showsCollectionRef, user]);
 
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
   const { data: upcomingShows, isLoading: isShowsLoading } = useCollection(showsQuery);
@@ -65,12 +65,33 @@ export default function DashboardPage() {
     date: ''
   });
 
-  if (isUserLoading || isProfileLoading) {
+  if (isUserLoading || (user && isProfileLoading)) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full rounded-[2rem] border-none shadow-xl">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-headline">Access Restricted</CardTitle>
+              <CardDescription>Please log in to view your talent dashboard.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center pb-8">
+               <Button asChild className="rounded-xl px-8">
+                 <Link href="/auth">Sign In</Link>
+               </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -96,7 +117,7 @@ export default function DashboardPage() {
   };
 
   const handleSaveShow = () => {
-    if (!showsCollectionRef || !user) return;
+    if (!showsCollectionRef || !user || !db) return;
 
     const showData = {
       ...showForm,
@@ -105,7 +126,7 @@ export default function DashboardPage() {
     };
 
     if (editingShow) {
-      const showDocRef = doc(db!, 'users', user.uid, 'shows', editingShow.id);
+      const showDocRef = doc(db, 'users', user.uid, 'shows', editingShow.id);
       updateDocumentNonBlocking(showDocRef, showData);
     } else {
       addDocumentNonBlocking(showsCollectionRef, {
@@ -135,7 +156,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex gap-3">
             <Button variant="outline" className="rounded-full" asChild>
-              <Link href={user ? `/profile/${user.uid}` : '#'}>View Public Profile</Link>
+              <Link href={`/profile/${user.uid}`}>View Public Profile</Link>
             </Button>
             <Button className="rounded-full px-8 gap-2">
               <Plus className="h-4 w-4" /> Create Workshop
@@ -151,7 +172,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Activity */}
           <div className="lg:col-span-2 space-y-8">
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
               <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
@@ -229,7 +249,6 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Side Panels */}
           <div className="space-y-8">
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden bg-primary text-white">
               <CardContent className="p-8">
@@ -266,7 +285,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Add/Edit Show Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
             <DialogHeader>

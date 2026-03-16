@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,13 +12,27 @@ import {
   Music,
   Plus,
   Loader2,
-  MapPin
+  MapPin,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { WORKSHOPS } from '@/lib/mock-data';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { addDocumentNonBlocking, updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -28,7 +43,27 @@ export default function DashboardPage() {
     return doc(db, 'users', user.uid);
   }, [db, user]);
 
+  const showsCollectionRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'shows');
+  }, [db, user]);
+
+  const showsQuery = useMemoFirebase(() => {
+    if (!showsCollectionRef) return null;
+    return query(showsCollectionRef, orderBy('date', 'asc'));
+  }, [showsCollectionRef]);
+
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
+  const { data: upcomingShows, isLoading: isShowsLoading } = useCollection(showsQuery);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingShow, setEditingShow] = useState<any>(null);
+  const [showForm, setShowForm] = useState({
+    title: '',
+    venue: '',
+    payout: '',
+    date: ''
+  });
 
   if (isUserLoading || isProfileLoading) {
     return (
@@ -43,11 +78,50 @@ export default function DashboardPage() {
 
   const displayName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
 
-  const upcomingShows = [
-    { id: 1, title: "Acoustic Night Live", venue: "The Velvet Lounge", payout: "$800", date: "Oct 25, 2023" },
-    { id: 2, title: "Jazz Fusion Workshop", venue: "Harmony Hall", payout: "$1,200", date: "Oct 28, 2023" },
-    { id: 3, title: "Private Corporate Gala", venue: "Grand Hyatt", payout: "$2,500", date: "Nov 02, 2023" }
-  ];
+  const handleOpenAddDialog = () => {
+    setEditingShow(null);
+    setShowForm({ title: '', venue: '', payout: '', date: '' });
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (show: any) => {
+    setEditingShow(show);
+    setShowForm({
+      title: show.title,
+      venue: show.venue,
+      payout: show.payout,
+      date: show.date
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveShow = () => {
+    if (!showsCollectionRef || !user) return;
+
+    const showData = {
+      ...showForm,
+      userId: user.uid,
+      updatedAt: serverTimestamp()
+    };
+
+    if (editingShow) {
+      const showDocRef = doc(db!, 'users', user.uid, 'shows', editingShow.id);
+      updateDocumentNonBlocking(showDocRef, showData);
+    } else {
+      addDocumentNonBlocking(showsCollectionRef, {
+        ...showData,
+        createdAt: serverTimestamp()
+      });
+    }
+
+    setIsDialogOpen(false);
+  };
+
+  const handleDeleteShow = (showId: string) => {
+    if (!db || !user) return;
+    const showDocRef = doc(db, 'users', user.uid, 'shows', showId);
+    deleteDocumentNonBlocking(showDocRef);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,7 +145,7 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard title="Total Earnings" value="$12,450" change="+12.5%" icon={DollarSign} color="text-green-600" />
-          <StatCard title="Active Bookings" value="8" change="+2" icon={Briefcase} color="text-primary" />
+          <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change="+0" icon={Briefcase} color="text-primary" />
           <StatCard title="Workshops" value="4" change="0" icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />
         </div>
@@ -80,30 +154,52 @@ export default function DashboardPage() {
           {/* Main Activity */}
           <div className="lg:col-span-2 space-y-8">
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
-              <CardHeader className="bg-white border-b border-border/50">
+              <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
                 <CardTitle className="text-xl font-headline">Upcoming Shows</CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleOpenAddDialog} className="rounded-full gap-1">
+                  <Plus className="h-4 w-4" /> Add Show
+                </Button>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/50">
-                  {upcomingShows.map(show => (
-                    <div key={show.id} className="p-6 flex items-center justify-between hover:bg-secondary/20 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                          <Music className="h-6 w-6" />
+                  {isShowsLoading ? (
+                    <div className="p-12 flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                  ) : upcomingShows && upcomingShows.length > 0 ? (
+                    upcomingShows.map(show => (
+                      <div key={show.id} className="p-6 flex items-center justify-between hover:bg-secondary/20 transition-colors group">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                            <Music className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold">{show.title}</h4>
+                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                              <MapPin className="h-3 w-3" /> {show.venue}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold">{show.title}</h4>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <MapPin className="h-3 w-3" /> {show.venue}
-                          </p>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm font-bold">{show.payout}</p>
+                            <p className="text-xs text-muted-foreground">{show.date}</p>
+                          </div>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleOpenEditDialog(show)}>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteShow(show.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold">{show.payout}</p>
-                        <p className="text-xs text-muted-foreground">{show.date}</p>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="p-12 text-center text-muted-foreground">
+                      <p>No upcoming shows listed.</p>
+                      <Button variant="link" onClick={handleOpenAddDialog} className="mt-2">Add your first show</Button>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -169,6 +265,64 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
+
+        {/* Add/Edit Show Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
+            <DialogHeader>
+              <DialogTitle>{editingShow ? 'Edit Show' : 'Add New Show'}</DialogTitle>
+              <DialogDescription>
+                Fill in the details for your upcoming performance.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Show Title</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g. Acoustic Night Live"
+                  value={showForm.title}
+                  onChange={(e) => setShowForm({ ...showForm, title: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="venue">Venue</Label>
+                <Input
+                  id="venue"
+                  placeholder="e.g. The Velvet Lounge"
+                  value={showForm.venue}
+                  onChange={(e) => setShowForm({ ...showForm, venue: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={showForm.date}
+                  onChange={(e) => setShowForm({ ...showForm, date: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="payout">Payout</Label>
+                <Input
+                  id="payout"
+                  placeholder="e.g. $800"
+                  value={showForm.payout}
+                  onChange={(e) => setShowForm({ ...showForm, payout: e.target.value })}
+                  className="rounded-xl"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">Cancel</Button>
+              <Button type="button" onClick={handleSaveShow} className="rounded-xl px-8">Save Show</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -12,22 +13,23 @@ service cloud.firestore {
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Profiles are publicly readable to allow community interaction
       allow read: if true;
-      // Users can only modify their own profile data
       allow write: if isOwner(userId);
 
       // Rules for the 'shows' subcollection
       match /shows/{showId} {
-        // Anyone can view shows (read includes get and list)
         allow read: if true;
-        // Only the owner of the user profile can manage their shows
+        allow write: if isOwner(userId);
+      }
+
+      // Rules for the 'workshops' subcollection
+      match /workshops/{workshopId} {
+        allow read: if true;
         allow write: if isOwner(userId);
       }
     }
 
     // Global catch-all rule for development
-    // This ensures any other collection access is permitted if the user is signed in
     match /{document=**} {
       allow read, write: if isSignedIn();
     }

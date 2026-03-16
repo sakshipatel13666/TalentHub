@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -34,6 +35,26 @@
       },
       "required": ["id", "userId", "title", "venue", "date", "createdAt", "updatedAt"]
     },
+    "Workshop": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Workshop",
+      "type": "object",
+      "description": "Represents a workshop hosted by a talent creator.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "participants": { "type": "number" },
+        "maxParticipants": { "type": "number" },
+        "image": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "category", "price", "date", "createdAt", "updatedAt"]
+    },
     "SkillCategory": {
       "title": "SkillCategory",
       "type": "object",
@@ -62,6 +83,14 @@
           "entityName": "Show",
           "schema": { "$ref": "#/backend/entities/Show" },
           "description": "Shows managed by a specific user."
+        }
+      },
+      {
+        "path": "/users/{userId}/workshops/{workshopId}",
+        "definition": {
+          "entityName": "Workshop",
+          "schema": { "$ref": "#/backend/entities/Workshop" },
+          "description": "Workshops managed by a specific user."
         }
       }
     ]

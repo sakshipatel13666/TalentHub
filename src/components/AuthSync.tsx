@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -8,7 +9,7 @@ import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 /**
  * AuthSync is a headless component that synchronizes the Firebase Authentication
  * user state with a corresponding document in the 'users' Firestore collection.
- * It also seeds initial default data like shows for a better first-time experience.
+ * It also seeds initial default data like shows and workshops for a better first-time experience.
  */
 export function AuthSync() {
   const { user, isUserLoading } = useUser();
@@ -64,6 +65,44 @@ export function AuthSync() {
         showRef,
         {
           ...show,
+          userId: user.uid,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
+
+    // Seed default workshops with fixed IDs
+    const defaultWorkshops = [
+      {
+        id: 'default-ws-1',
+        title: 'Mastering React Server Components',
+        category: 'Coding',
+        price: '$49',
+        date: '2024-12-24',
+        participants: 12,
+        maxParticipants: 20,
+        image: 'https://picsum.photos/seed/react/600/400'
+      },
+      {
+        id: 'default-ws-2',
+        title: 'Introduction to Brand Identity',
+        category: 'Design',
+        price: 'Free',
+        date: '2024-12-28',
+        participants: 45,
+        maxParticipants: 100,
+        image: 'https://picsum.photos/seed/brand/600/400'
+      }
+    ];
+
+    defaultWorkshops.forEach((ws) => {
+      const wsRef = doc(db, 'users', user.uid, 'workshops', ws.id);
+      setDocumentNonBlocking(
+        wsRef,
+        {
+          ...ws,
           userId: user.uid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),

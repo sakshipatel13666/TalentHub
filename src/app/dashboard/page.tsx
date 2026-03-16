@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -14,9 +15,9 @@ import {
   Loader2,
   MapPin,
   Edit2,
-  Trash2
+  Trash2,
+  BookOpen
 } from 'lucide-react';
-import { WORKSHOPS } from '@/lib/mock-data';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
@@ -29,10 +30,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -48,21 +55,44 @@ export default function DashboardPage() {
     return collection(db, 'users', user.uid, 'shows');
   }, [db, user]);
 
+  const workshopsCollectionRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return collection(db, 'users', user.uid, 'workshops');
+  }, [db, user]);
+
   const showsQuery = useMemoFirebase(() => {
     if (!showsCollectionRef || !user) return null;
     return query(showsCollectionRef, orderBy('date', 'asc'));
   }, [showsCollectionRef, user]);
 
+  const workshopsQuery = useMemoFirebase(() => {
+    if (!workshopsCollectionRef || !user) return null;
+    return query(workshopsCollectionRef, orderBy('date', 'asc'));
+  }, [workshopsCollectionRef, user]);
+
   const { data: profile, isLoading: isProfileLoading } = useDoc(userRef);
   const { data: upcomingShows, isLoading: isShowsLoading } = useCollection(showsQuery);
+  const { data: myWorkshops, isLoading: isWorkshopsLoading } = useCollection(workshopsQuery);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // Show Dialog State
+  const [isShowDialogOpen, setIsShowDialogOpen] = useState(false);
   const [editingShow, setEditingShow] = useState<any>(null);
   const [showForm, setShowForm] = useState({
     title: '',
     venue: '',
     payout: '',
     date: ''
+  });
+
+  // Workshop Dialog State
+  const [isWorkshopDialogOpen, setIsWorkshopDialogOpen] = useState(false);
+  const [editingWorkshop, setEditingWorkshop] = useState<any>(null);
+  const [workshopForm, setWorkshopForm] = useState({
+    title: '',
+    category: 'Coding',
+    price: '',
+    date: '',
+    maxParticipants: '20'
   });
 
   if (isUserLoading || (user && isProfileLoading)) {
@@ -111,13 +141,14 @@ export default function DashboardPage() {
     maximumFractionDigits: 0,
   }).format(totalEarningsValue);
 
-  const handleOpenAddDialog = () => {
+  // Show Actions
+  const handleOpenAddShowDialog = () => {
     setEditingShow(null);
     setShowForm({ title: '', venue: '', payout: '', date: '' });
-    setIsDialogOpen(true);
+    setIsShowDialogOpen(true);
   };
 
-  const handleOpenEditDialog = (show: any) => {
+  const handleOpenEditShowDialog = (show: any) => {
     setEditingShow(show);
     setShowForm({
       title: show.title,
@@ -125,35 +156,65 @@ export default function DashboardPage() {
       payout: show.payout,
       date: show.date
     });
-    setIsDialogOpen(true);
+    setIsShowDialogOpen(true);
   };
 
   const handleSaveShow = () => {
     if (!showsCollectionRef || !user || !db) return;
-
-    const showData = {
-      ...showForm,
-      userId: user.uid,
-      updatedAt: serverTimestamp()
-    };
-
+    const showData = { ...showForm, userId: user.uid, updatedAt: serverTimestamp() };
     if (editingShow) {
-      const showDocRef = doc(db, 'users', user.uid, 'shows', editingShow.id);
-      updateDocumentNonBlocking(showDocRef, showData);
+      updateDocumentNonBlocking(doc(db, 'users', user.uid, 'shows', editingShow.id), showData);
     } else {
-      addDocumentNonBlocking(showsCollectionRef, {
-        ...showData,
-        createdAt: serverTimestamp()
-      });
+      addDocumentNonBlocking(showsCollectionRef, { ...showData, createdAt: serverTimestamp() });
     }
-
-    setIsDialogOpen(false);
+    setIsShowDialogOpen(false);
   };
 
   const handleDeleteShow = (showId: string) => {
     if (!db || !user) return;
-    const showDocRef = doc(db, 'users', user.uid, 'shows', showId);
-    deleteDocumentNonBlocking(showDocRef);
+    deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'shows', showId));
+  };
+
+  // Workshop Actions
+  const handleOpenAddWorkshopDialog = () => {
+    setEditingWorkshop(null);
+    setWorkshopForm({ title: '', category: 'Coding', price: '', date: '', maxParticipants: '20' });
+    setIsWorkshopDialogOpen(true);
+  };
+
+  const handleOpenEditWorkshopDialog = (ws: any) => {
+    setEditingWorkshop(ws);
+    setWorkshopForm({
+      title: ws.title,
+      category: ws.category,
+      price: ws.price,
+      date: ws.date,
+      maxParticipants: ws.maxParticipants?.toString() || '20'
+    });
+    setIsWorkshopDialogOpen(true);
+  };
+
+  const handleSaveWorkshop = () => {
+    if (!workshopsCollectionRef || !user || !db) return;
+    const workshopData = {
+      ...workshopForm,
+      maxParticipants: parseInt(workshopForm.maxParticipants) || 20,
+      participants: editingWorkshop ? editingWorkshop.participants : 0,
+      image: editingWorkshop ? editingWorkshop.image : `https://picsum.photos/seed/${Math.random()}/600/400`,
+      userId: user.uid,
+      updatedAt: serverTimestamp()
+    };
+    if (editingWorkshop) {
+      updateDocumentNonBlocking(doc(db, 'users', user.uid, 'workshops', editingWorkshop.id), workshopData);
+    } else {
+      addDocumentNonBlocking(workshopsCollectionRef, { ...workshopData, createdAt: serverTimestamp() });
+    }
+    setIsWorkshopDialogOpen(false);
+  };
+
+  const handleDeleteWorkshop = (wsId: string) => {
+    if (!db || !user) return;
+    deleteDocumentNonBlocking(doc(db, 'users', user.uid, 'workshops', wsId));
   };
 
   return (
@@ -170,7 +231,7 @@ export default function DashboardPage() {
             <Button variant="outline" className="rounded-full" asChild>
               <Link href={`/profile/${user.uid}`}>View Public Profile</Link>
             </Button>
-            <Button className="rounded-full px-8 gap-2">
+            <Button className="rounded-full px-8 gap-2" onClick={handleOpenAddWorkshopDialog}>
               <Plus className="h-4 w-4" /> Create Workshop
             </Button>
           </div>
@@ -179,7 +240,7 @@ export default function DashboardPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard title="Total Earnings" value={formattedEarnings} change="+0%" icon={DollarSign} color="text-green-600" />
           <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change="+0" icon={Briefcase} color="text-primary" />
-          <StatCard title="Workshops" value="4" change="0" icon={Calendar} color="text-accent" />
+          <StatCard title="Workshops" value={myWorkshops?.length || 0} change="+0" icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />
         </div>
 
@@ -188,7 +249,7 @@ export default function DashboardPage() {
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
               <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
                 <CardTitle className="text-xl font-headline">Upcoming Shows</CardTitle>
-                <Button variant="ghost" size="sm" onClick={handleOpenAddDialog} className="rounded-full gap-1">
+                <Button variant="ghost" size="sm" onClick={handleOpenAddShowDialog} className="rounded-full gap-1">
                   <Plus className="h-4 w-4" /> Add Show
                 </Button>
               </CardHeader>
@@ -216,7 +277,7 @@ export default function DashboardPage() {
                             <p className="text-xs text-muted-foreground">{show.date}</p>
                           </div>
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleOpenEditDialog(show)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleOpenEditShowDialog(show)}>
                               <Edit2 className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteShow(show.id)}>
@@ -229,7 +290,7 @@ export default function DashboardPage() {
                   ) : (
                     <div className="p-12 text-center text-muted-foreground">
                       <p>No upcoming shows listed.</p>
-                      <Button variant="link" onClick={handleOpenAddDialog} className="mt-2">Add your first show</Button>
+                      <Button variant="link" onClick={handleOpenAddShowDialog} className="mt-2">Add your first show</Button>
                     </div>
                   )}
                 </div>
@@ -237,25 +298,47 @@ export default function DashboardPage() {
             </Card>
 
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
-              <CardHeader className="bg-white border-b border-border/50">
+              <CardHeader className="bg-white border-b border-border/50 flex flex-row items-center justify-between py-4 px-6">
                 <CardTitle className="text-xl font-headline">My Workshops</CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleOpenAddWorkshopDialog} className="rounded-full gap-1">
+                  <Plus className="h-4 w-4" /> Add Workshop
+                </Button>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/50">
-                  {WORKSHOPS.slice(0, 2).map(ws => (
-                    <div key={ws.id} className="p-6 flex items-center justify-between hover:bg-secondary/20 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="relative h-12 w-16 rounded-lg overflow-hidden shrink-0">
-                          <Image src={ws.image} alt={ws.title} fill className="object-cover" />
+                  {isWorkshopsLoading ? (
+                    <div className="p-12 flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                  ) : myWorkshops && myWorkshops.length > 0 ? (
+                    myWorkshops.map(ws => (
+                      <div key={ws.id} className="p-6 flex items-center justify-between hover:bg-secondary/20 transition-colors group">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-12 w-16 rounded-lg overflow-hidden shrink-0">
+                            <Image src={ws.image || 'https://picsum.photos/seed/ws/600/400'} alt={ws.title} fill className="object-cover" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold">{ws.title}</h4>
+                            <p className="text-sm text-muted-foreground">{ws.participants || 0} students enrolled • {ws.price}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold">{ws.title}</h4>
-                          <p className="text-sm text-muted-foreground">{ws.participants} students enrolled</p>
+                        <div className="flex items-center gap-2">
+                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleOpenEditWorkshopDialog(ws)}>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDeleteWorkshop(ws.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <Button variant="ghost" className="text-accent font-bold">Manage</Button>
                         </div>
                       </div>
-                      <Button variant="ghost" className="text-accent font-bold">Manage</Button>
+                    ))
+                  ) : (
+                    <div className="p-12 text-center text-muted-foreground">
+                      <p>No workshops created yet.</p>
+                      <Button variant="link" onClick={handleOpenAddWorkshopDialog} className="mt-2">Host your first workshop</Button>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -297,59 +380,81 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        {/* Show Dialog */}
+        <Dialog open={isShowDialogOpen} onOpenChange={setIsShowDialogOpen}>
           <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
             <DialogHeader>
               <DialogTitle>{editingShow ? 'Edit Show' : 'Add New Show'}</DialogTitle>
-              <DialogDescription>
-                Fill in the details for your upcoming performance.
-              </DialogDescription>
+              <DialogDescription>Fill in the details for your upcoming performance.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="title">Show Title</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g. Acoustic Night Live"
-                  value={showForm.title}
-                  onChange={(e) => setShowForm({ ...showForm, title: e.target.value })}
-                  className="rounded-xl"
-                />
+                <Input id="title" placeholder="e.g. Acoustic Night Live" value={showForm.title} onChange={(e) => setShowForm({ ...showForm, title: e.target.value })} className="rounded-xl" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="venue">Venue</Label>
-                <Input
-                  id="venue"
-                  placeholder="e.g. The Velvet Lounge"
-                  value={showForm.venue}
-                  onChange={(e) => setShowForm({ ...showForm, venue: e.target.value })}
-                  className="rounded-xl"
-                />
+                <Input id="venue" placeholder="e.g. The Velvet Lounge" value={showForm.venue} onChange={(e) => setShowForm({ ...showForm, venue: e.target.value })} className="rounded-xl" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={showForm.date}
-                  onChange={(e) => setShowForm({ ...showForm, date: e.target.value })}
-                  className="rounded-xl"
-                />
+                <Input id="date" type="date" value={showForm.date} onChange={(e) => setShowForm({ ...showForm, date: e.target.value })} className="rounded-xl" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="payout">Payout</Label>
-                <Input
-                  id="payout"
-                  placeholder="e.g. $800"
-                  value={showForm.payout}
-                  onChange={(e) => setShowForm({ ...showForm, payout: e.target.value })}
-                  className="rounded-xl"
-                />
+                <Input id="payout" placeholder="e.g. $800" value={showForm.payout} onChange={(e) => setShowForm({ ...showForm, payout: e.target.value })} className="rounded-xl" />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setIsShowDialogOpen(false)} className="rounded-xl">Cancel</Button>
               <Button type="button" onClick={handleSaveShow} className="rounded-xl px-8">Save Show</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workshop Dialog */}
+        <Dialog open={isWorkshopDialogOpen} onOpenChange={setIsWorkshopDialogOpen}>
+          <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
+            <DialogHeader>
+              <DialogTitle>{editingWorkshop ? 'Edit Workshop' : 'Create Workshop'}</DialogTitle>
+              <DialogDescription>Share your knowledge with the TalentHub community.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="ws-title">Workshop Title</Label>
+                <Input id="ws-title" placeholder="e.g. UI Design Masterclass" value={workshopForm.title} onChange={(e) => setWorkshopForm({ ...workshopForm, title: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={workshopForm.category} onValueChange={(v) => setWorkshopForm({...workshopForm, category: v})}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Coding">Coding</SelectItem>
+                    <SelectItem value="Design">Design</SelectItem>
+                    <SelectItem value="Music">Music</SelectItem>
+                    <SelectItem value="Photography">Photography</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="ws-date">Date</Label>
+                <Input id="ws-date" type="date" value={workshopForm.date} onChange={(e) => setWorkshopForm({ ...workshopForm, date: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="ws-price">Price</Label>
+                <Input id="ws-price" placeholder="e.g. $49 or Free" value={workshopForm.price} onChange={(e) => setWorkshopForm({ ...workshopForm, price: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="ws-max">Max Participants</Label>
+                <Input id="ws-max" type="number" value={workshopForm.maxParticipants} onChange={(e) => setWorkshopForm({ ...workshopForm, maxParticipants: e.target.value })} className="rounded-xl" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsWorkshopDialogOpen(false)} className="rounded-xl">Cancel</Button>
+              <Button type="button" onClick={handleSaveWorkshop} className="rounded-xl px-8">Save Workshop</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

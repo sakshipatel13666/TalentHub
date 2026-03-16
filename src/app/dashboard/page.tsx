@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +18,8 @@ import {
   Trash2,
   Video,
   Play,
-  ExternalLink
+  Upload,
+  Check
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -47,6 +48,7 @@ import {
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
 
   const userRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -255,6 +257,17 @@ export default function DashboardPage() {
       description: vid.description || ''
     });
     setIsVideoDialogOpen(true);
+  };
+
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVideoForm(prev => ({ ...prev, videoUrl: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSaveVideo = () => {
@@ -568,7 +581,7 @@ export default function DashboardPage() {
           <DialogContent className="sm:max-w-[425px] rounded-[2rem]">
             <DialogHeader>
               <DialogTitle>{editingVideo ? 'Edit Portfolio Video' : 'Add Portfolio Video'}</DialogTitle>
-              <DialogDescription>Provide a URL to showcase your talent publicly.</DialogDescription>
+              <DialogDescription>Upload a video file to showcase your talent publicly.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
@@ -576,8 +589,27 @@ export default function DashboardPage() {
                 <Input id="vid-title" placeholder="e.g. Live at The O2" value={videoForm.title} onChange={(e) => setVideoForm({ ...videoForm, title: e.target.value })} className="rounded-xl" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="vid-url">Video URL (Public Link)</Label>
-                <Input id="vid-url" placeholder="e.g. https://www.youtube.com/watch?v=..." value={videoForm.videoUrl} onChange={(e) => setVideoForm({ ...videoForm, videoUrl: e.target.value })} className="rounded-xl" />
+                <Label>Upload Video File</Label>
+                <div 
+                  onClick={() => videoFileInputRef.current?.click()}
+                  className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm font-medium">Click to select video from desktop</p>
+                  <p className="text-xs text-muted-foreground mt-1">Max size: 1MB (Prototype limit)</p>
+                  {videoForm.videoUrl && videoForm.videoUrl.startsWith('data:video') && (
+                    <div className="mt-4 p-2 bg-primary/10 rounded-lg text-primary text-xs font-bold flex items-center justify-center gap-2">
+                      <Check className="h-3 w-3" /> File selected
+                    </div>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={videoFileInputRef} 
+                  onChange={handleVideoFileChange} 
+                  className="hidden" 
+                  accept="video/*"
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="vid-desc">Short Description (Optional)</Label>

@@ -172,17 +172,29 @@ export default function ProfilePage() {
                     videos.map((vid) => (
                       <div key={vid.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border/50 group">
                         <div className="relative aspect-video bg-muted flex items-center justify-center">
-                          <Play className="h-12 w-12 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
-                          <div className="absolute inset-0 bg-black/5" />
+                          {vid.videoUrl.startsWith('data:video') ? (
+                             <video 
+                              src={vid.videoUrl} 
+                              controls 
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <>
+                              <Play className="h-12 w-12 text-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                              <div className="absolute inset-0 bg-black/5" />
+                            </>
+                          )}
                         </div>
                         <div className="p-4">
                           <h4 className="font-bold mb-1 truncate">{vid.title}</h4>
                           <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{vid.description || 'No description provided.'}</p>
-                          <Button variant="outline" size="sm" className="w-full rounded-xl gap-2" asChild>
-                            <a href={vid.videoUrl} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-3 w-3" /> Watch Publicly
-                            </a>
-                          </Button>
+                          {!vid.videoUrl.startsWith('data:video') && (
+                            <Button variant="outline" size="sm" className="w-full rounded-xl gap-2" asChild>
+                              <a href={vid.videoUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-3 w-3" /> Watch Publicly
+                              </a>
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))

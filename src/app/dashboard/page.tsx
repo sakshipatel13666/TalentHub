@@ -99,6 +99,18 @@ export default function DashboardPage() {
 
   const displayName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
 
+  // Calculate dynamic total earnings
+  const totalEarningsValue = upcomingShows?.reduce((acc, show) => {
+    const value = parseFloat(show.payout.replace(/[^0-9.]/g, '')) || 0;
+    return acc + value;
+  }, 0) || 0;
+
+  const formattedEarnings = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(totalEarningsValue);
+
   const handleOpenAddDialog = () => {
     setEditingShow(null);
     setShowForm({ title: '', venue: '', payout: '', date: '' });
@@ -165,7 +177,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Total Earnings" value="$12,450" change="+12.5%" icon={DollarSign} color="text-green-600" />
+          <StatCard title="Total Earnings" value={formattedEarnings} change="+0%" icon={DollarSign} color="text-green-600" />
           <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change="+0" icon={Briefcase} color="text-primary" />
           <StatCard title="Workshops" value="4" change="0" icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />

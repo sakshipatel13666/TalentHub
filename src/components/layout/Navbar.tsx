@@ -1,10 +1,10 @@
+
 "use client";
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Search, Menu, User, Bell, MessageSquare, Loader2 } from 'lucide-react';
 import { useUser, useAuth } from '@/firebase';
-import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 import { signOut } from 'firebase/auth';
 import { 
   DropdownMenu, 
@@ -17,10 +17,6 @@ import {
 export function Navbar() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-
-  const handleJoinNow = () => {
-    initiateAnonymousSignIn(auth);
-  };
 
   const handleLogout = () => {
     signOut(auth);
@@ -54,8 +50,12 @@ export function Navbar() {
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           ) : !user ? (
             <>
-              <Button variant="ghost" className="hidden sm:flex" onClick={handleJoinNow}>Log in</Button>
-              <Button className="rounded-full px-6" onClick={handleJoinNow}>Join Now</Button>
+              <Button variant="ghost" className="hidden sm:flex" asChild>
+                <Link href="/auth">Log in</Link>
+              </Button>
+              <Button className="rounded-full px-6" asChild>
+                <Link href="/auth">Join Now</Link>
+              </Button>
             </>
           ) : (
             <div className="flex items-center gap-3">
@@ -72,7 +72,9 @@ export function Navbar() {
                     {user.photoURL ? (
                       <img src={user.photoURL} alt={user.displayName || 'User'} className="h-full w-full object-cover" />
                     ) : (
-                      <User className="h-5 w-5" />
+                      <div className="h-full w-full flex items-center justify-center talent-gradient text-white text-xs font-bold">
+                        {user.email?.[0].toUpperCase() || 'U'}
+                      </div>
                     )}
                   </Button>
                 </DropdownMenuTrigger>

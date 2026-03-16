@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -93,12 +92,6 @@ export default function AuthPage() {
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <Input id="signup-password" name="password" type="password" required className="rounded-xl h-12" />
-                  </div>
-                  <div className="flex items-center gap-2 py-2">
-                    <input type="checkbox" id="terms" required className="rounded border-gray-300 text-primary focus:ring-primary" />
-                    <label htmlFor="terms" className="text-xs text-muted-foreground">
-                      I agree to the <Link href="#" className="text-primary font-bold hover:underline">Terms of Service</Link> and <Link href="#" className="text-primary font-bold hover:underline">Privacy Policy</Link>.
-                    </label>
                   </div>
                   <Button type="submit" className="w-full h-12 rounded-xl font-bold mt-2" disabled={isLoading}>
                     {isLoading ? 'Creating account...' : 'Create Account'}

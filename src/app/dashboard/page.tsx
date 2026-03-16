@@ -8,9 +8,10 @@ import {
   Calendar, 
   DollarSign, 
   Star, 
-  CheckCircle2,
+  Music,
   Plus,
-  Loader2
+  Loader2,
+  MapPin
 } from 'lucide-react';
 import { WORKSHOPS } from '@/lib/mock-data';
 import Link from 'next/link';
@@ -42,6 +43,12 @@ export default function DashboardPage() {
 
   const displayName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
 
+  const upcomingShows = [
+    { id: 1, title: "Acoustic Night Live", venue: "The Velvet Lounge", payout: "$800", date: "Oct 25, 2023" },
+    { id: 2, title: "Jazz Fusion Workshop", venue: "Harmony Hall", payout: "$1,200", date: "Oct 28, 2023" },
+    { id: 3, title: "Private Corporate Gala", venue: "Grand Hyatt", payout: "$2,500", date: "Nov 02, 2023" }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -64,7 +71,7 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard title="Total Earnings" value="$12,450" change="+12.5%" icon={DollarSign} color="text-green-600" />
-          <StatCard title="Active Projects" value="8" change="+2" icon={Briefcase} color="text-primary" />
+          <StatCard title="Active Bookings" value="8" change="+2" icon={Briefcase} color="text-primary" />
           <StatCard title="Workshops" value="4" change="0" icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />
         </div>
@@ -74,24 +81,26 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-8">
             <Card className="border-none shadow-sm rounded-3xl overflow-hidden">
               <CardHeader className="bg-white border-b border-border/50">
-                <CardTitle className="text-xl font-headline">Upcoming Projects</CardTitle>
+                <CardTitle className="text-xl font-headline">Upcoming Shows</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/50">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="p-6 flex items-center justify-between hover:bg-secondary/20 transition-colors">
+                  {upcomingShows.map(show => (
+                    <div key={show.id} className="p-6 flex items-center justify-between hover:bg-secondary/20 transition-colors">
                       <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                          <CheckCircle2 className="h-6 w-6" />
+                          <Music className="h-6 w-6" />
                         </div>
                         <div>
-                          <h4 className="font-bold">E-commerce UI Overhaul</h4>
-                          <p className="text-sm text-muted-foreground">Client: TechFlow Solutions</p>
+                          <h4 className="font-bold">{show.title}</h4>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {show.venue}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold">$2,500</p>
-                        <p className="text-xs text-muted-foreground">Due in 4 days</p>
+                        <p className="text-sm font-bold">{show.payout}</p>
+                        <p className="text-xs text-muted-foreground">{show.date}</p>
                       </div>
                     </div>
                   ))}
@@ -146,10 +155,10 @@ export default function DashboardPage() {
                     <div className="h-10 w-10 rounded-full bg-secondary shrink-0"></div>
                     <div className="flex-1 overflow-hidden">
                       <div className="flex justify-between">
-                        <p className="text-sm font-bold">John Doe</p>
+                        <p className="text-sm font-bold">Booking Agent</p>
                         <span className="text-[10px] text-muted-foreground uppercase">10m ago</span>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">Hey, let's discuss the final mockups for the checkout flow...</p>
+                      <p className="text-xs text-muted-foreground truncate">Confirmation for your Friday night performance at...</p>
                     </div>
                   </div>
                 ))}

@@ -13,9 +13,9 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
-import { User, Bell, Loader2, Save, ArrowLeft, Camera, Upload } from 'lucide-react';
+import { User, Bell, Loader2, Save, ArrowLeft, Camera, Upload, Wand2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { aiContentAssistant } from '@/ai/flows/ai-content-assistant';
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -39,6 +39,7 @@ export default function SettingsPage() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingBio, setIsGeneratingBio] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -74,6 +75,41 @@ export default function SettingsPage() {
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleRefineBioWithAI = async () => {
+    if (!formData.name) {
+      toast({
+        variant: "destructive",
+        title: "Name required",
+        description: "Please enter your name first so the AI can personalize your bio.",
+      });
+      return;
+    }
+
+    setIsGeneratingBio(true);
+    try {
+      const result = await aiContentAssistant({
+        contentType: 'bio',
+        context: `User name is ${formData.name}. They are a creative professional on TalentHub.`,
+        currentText: formData.bio,
+        desiredLength: 'medium',
+      });
+      
+      setFormData(prev => ({ ...prev, bio: result.generatedContent }));
+      toast({
+        title: "Bio generated!",
+        description: "AI has drafted a new bio for you. Don't forget to save changes.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "AI Assistant Error",
+        description: "Failed to generate bio. Please try again later.",
+      });
+    } finally {
+      setIsGeneratingBio(false);
+    }
   };
 
   const handleSave = () => {
@@ -200,7 +236,23 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-primary gap-2 h-8 px-2 hover:bg-primary/5 font-bold"
+                      onClick={handleRefineBioWithAI}
+                      disabled={isGeneratingBio}
+                    >
+                      {isGeneratingBio ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Wand2 className="h-3.5 w-3.5" />
+                      )}
+                      AI Refine Bio
+                    </Button>
+                  </div>
                   <Textarea 
                     id="bio" 
                     name="bio" 
@@ -209,7 +261,10 @@ export default function SettingsPage() {
                     placeholder="Tell us about your expertise and what you offer..." 
                     className="rounded-xl min-h-[120px] resize-none" 
                   />
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Briefly describe yourself to potential clients or students.</p>
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    <span>Tip: Use the AI Refine button to professionally polish your bio.</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

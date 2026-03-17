@@ -8,9 +8,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video as VideoIcon, X, Loader2 } from 'lucide-react';
+import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Play, ExternalLink, Video as VideoIcon, X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { aiContentAssistant } from '@/ai/flows/ai-content-assistant';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, orderBy } from 'firebase/firestore';
 import {
@@ -54,25 +53,7 @@ export default function ProfilePage() {
     image: profile?.profilePhotoUrl || mockTalent.image,
   };
 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedBio, setGeneratedBio] = useState<string | null>(null);
   const [playingVideo, setPlayingVideo] = useState<any>(null);
-
-  const handleGenerateBio = async () => {
-    setIsGenerating(true);
-    try {
-      const result = await aiContentAssistant({
-        contentType: 'bio',
-        context: `User is a ${talent.role} with skills in ${talent.skills.join(', ')}. Name is ${talent.name}.`,
-        desiredLength: 'medium'
-      });
-      setGeneratedBio(result.generatedContent);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   if (isProfileLoading && !profile) {
     return (
@@ -149,20 +130,10 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-headline font-bold">About Me</h2>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-primary gap-2 h-8 px-2 hover:bg-primary/5"
-                    onClick={handleGenerateBio}
-                    disabled={isGenerating}
-                  >
-                    <Wand2 className="h-3.5 w-3.5" /> 
-                    {isGenerating ? 'Drafting...' : 'AI Content Assistant'}
-                  </Button>
                 </div>
                 
                 <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {generatedBio || talent.bio}
+                  {talent.bio}
                 </p>
 
                 <div>

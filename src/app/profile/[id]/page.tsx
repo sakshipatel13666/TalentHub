@@ -3,15 +3,16 @@
 
 import { Navbar } from '@/components/layout/Navbar';
 import { TALENTS } from '@/lib/mock-data';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Play, ExternalLink, Video as VideoIcon, X, Loader2 } from 'lucide-react';
+import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Play, ExternalLink, Video as VideoIcon, X, Loader2, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import { doc, collection, query, orderBy } from 'firebase/firestore';
+import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import {
 
 export default function ProfilePage() {
   const { id } = useParams();
+  const router = useRouter();
   const db = useFirestore();
   const talentId = Array.isArray(id) ? id[0] : id;
 
@@ -72,6 +74,17 @@ export default function ProfilePage() {
       
       <div className="h-64 talent-gradient relative">
         <div className="absolute inset-0 bg-black/10"></div>
+        <div className="container mx-auto px-4 h-full relative">
+          <Button 
+            variant="ghost" 
+            className="absolute top-6 left-4 text-white hover:bg-white/20 rounded-full font-bold gap-2 z-20"
+            asChild
+          >
+            <Link href="/explore">
+              <ArrowLeft className="h-4 w-4" /> Back to Explore
+            </Link>
+          </Button>
+        </div>
       </div>
       
       <main className="container mx-auto px-4 -mt-24 relative z-10">

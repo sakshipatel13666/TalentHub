@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -10,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/firebase';
 import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight, Github, Mail } from 'lucide-react';
+import { Sparkles, ArrowLeft, Github, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthPage() {
@@ -45,7 +46,13 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-20 flex items-center justify-center">
+      <main className="container mx-auto px-4 py-12 flex flex-col items-center justify-center">
+        <div className="w-full max-w-md mb-6">
+           <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-8">
+            <ArrowLeft className="h-4 w-4" /> Back to Home
+          </Link>
+        </div>
+
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl talent-gradient text-white font-bold text-2xl mb-4 shadow-lg shadow-primary/20">T</div>

@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video as VideoIcon, X } from 'lucide-react';
+import { Star, MapPin, Globe, Twitter, Linkedin, MessageSquare, Briefcase, Wand2, Play, ExternalLink, Video as VideoIcon, X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { aiContentAssistant } from '@/ai/flows/ai-content-assistant';
 import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
@@ -41,15 +41,16 @@ export default function ProfilePage() {
     return query(videosRef, orderBy('createdAt', 'desc'));
   }, [videosRef]);
 
-  const { data: profile } = useDoc(talentRef);
-  const { data: videos } = useCollection(videosQuery);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(talentRef);
+  const { data: videos, isLoading: isVideosLoading } = useCollection(videosQuery);
 
-  // Fallback to mock data if it matches, otherwise use profile data
+  // Use Firestore data if available, fallback to mock data if id matches, otherwise default
   const mockTalent = TALENTS.find(t => t.id === talentId) || TALENTS[0];
+  
   const talent = {
     ...mockTalent,
-    name: profile?.name || mockTalent.name,
-    bio: profile?.bio || mockTalent.bio,
+    name: profile?.name || (isProfileLoading ? "Loading..." : mockTalent.name),
+    bio: profile?.bio || (isProfileLoading ? "" : mockTalent.bio),
     image: profile?.profilePhotoUrl || mockTalent.image,
   };
 
@@ -72,6 +73,17 @@ export default function ProfilePage() {
       setIsGenerating(false);
     }
   };
+
+  if (isProfileLoading && !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -176,7 +188,9 @@ export default function ProfilePage() {
               
               <TabsContent value="videos" className="mt-0">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {videos && videos.length > 0 ? (
+                  {isVideosLoading ? (
+                    <div className="col-span-full py-12 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                  ) : videos && videos.length > 0 ? (
                     videos.map((vid) => (
                       <div 
                         key={vid.id} 

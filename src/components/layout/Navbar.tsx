@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Search, Menu, User, Bell, MessageSquare, Loader2, Check } from 'lucide-react';
-import { useUser, useAuth, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser, useAuth, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, query, orderBy, limit, doc } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -21,6 +22,14 @@ export function Navbar() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const db = useFirestore();
+
+  // Fetch current user's profile from Firestore
+  const userRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(userRef);
 
   // Fetch notifications
   const notificationsQuery = useMemoFirebase(() => {
@@ -43,6 +52,9 @@ export function Navbar() {
     if (!user || !db) return;
     updateDocumentNonBlocking(doc(db, 'users', user.uid, 'notifications', id), { read: true });
   };
+
+  const displayName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'Member';
+  const displayPhoto = profile?.profilePhotoUrl || user?.photoURL;
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -138,11 +150,11 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full overflow-hidden border">
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName || 'User'} className="h-full w-full object-cover" />
+                    {displayPhoto ? (
+                      <img src={displayPhoto} alt={displayName} className="h-full w-full object-cover" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center talent-gradient text-white text-xs font-bold">
-                        {user.email?.[0].toUpperCase() || 'U'}
+                        {displayName[0]?.toUpperCase() || 'U'}
                       </div>
                     )}
                   </Button>
@@ -150,10 +162,10 @@ export function Navbar() {
                 <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-none">
                   <div className="flex items-center gap-3 p-3">
                     <div className="h-10 w-10 rounded-full talent-gradient flex items-center justify-center text-white font-bold">
-                       {user.email?.[0].toUpperCase() || 'U'}
+                       {displayName[0]?.toUpperCase() || 'U'}
                     </div>
                     <div className="flex flex-col overflow-hidden">
-                      <span className="text-sm font-bold truncate">{user.displayName || 'Member'}</span>
+                      <span className="text-sm font-bold truncate">{displayName}</span>
                       <span className="text-[10px] text-muted-foreground truncate uppercase tracking-tighter">{user.email || 'Anonymous'}</span>
                     </div>
                   </div>

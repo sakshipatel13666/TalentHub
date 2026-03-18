@@ -35,6 +35,42 @@
       "description": "Collaborative creative workspace",
       "imageUrl": "https://picsum.photos/seed/hero/1200/800",
       "imageHint": "creative collaboration"
+    },
+    {
+      "id": "cat-coding",
+      "description": "Modern software development workspace",
+      "imageUrl": "https://picsum.photos/seed/coding/400/300",
+      "imageHint": "coding programming"
+    },
+    {
+      "id": "cat-design",
+      "description": "Creative graphic design studio",
+      "imageUrl": "https://picsum.photos/seed/design/400/300",
+      "imageHint": "graphic design"
+    },
+    {
+      "id": "cat-music",
+      "description": "Professional music recording studio",
+      "imageUrl": "https://picsum.photos/seed/music/400/300",
+      "imageHint": "music studio"
+    },
+    {
+      "id": "cat-photo",
+      "description": "Professional photography equipment",
+      "imageUrl": "https://picsum.photos/seed/photo/400/300",
+      "imageHint": "photography camera"
+    },
+    {
+      "id": "cat-fitness",
+      "description": "Peaceful yoga and fitness studio",
+      "imageUrl": "https://picsum.photos/seed/fitness/400/300",
+      "imageHint": "fitness yoga"
+    },
+    {
+      "id": "cat-marketing",
+      "description": "Business marketing strategy meeting",
+      "imageUrl": "https://picsum.photos/seed/marketing/400/300",
+      "imageHint": "marketing strategy"
     }
   ]
 }

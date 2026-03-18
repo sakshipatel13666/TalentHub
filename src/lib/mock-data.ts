@@ -1,10 +1,48 @@
+import { PlaceHolderImages } from './placeholder-images';
+
 export const CATEGORIES = [
-  { id: 'coding', name: 'Coding', icon: 'Code' },
-  { id: 'design', name: 'Design', icon: 'Palette' },
-  { id: 'music', name: 'Music', icon: 'Music' },
-  { id: 'photo', name: 'Photography', icon: 'Camera' },
-  { id: 'fitness', name: 'Fitness', icon: 'Dumbbell' },
-  { id: 'marketing', name: 'Marketing', icon: 'Megaphone' },
+  { 
+    id: 'coding', 
+    name: 'Coding', 
+    icon: 'Code',
+    image: PlaceHolderImages.find(img => img.id === 'cat-coding')?.imageUrl || 'https://picsum.photos/seed/coding/400/300',
+    imageHint: 'coding programming'
+  },
+  { 
+    id: 'design', 
+    name: 'Design', 
+    icon: 'Palette',
+    image: PlaceHolderImages.find(img => img.id === 'cat-design')?.imageUrl || 'https://picsum.photos/seed/design/400/300',
+    imageHint: 'graphic design'
+  },
+  { 
+    id: 'music', 
+    name: 'Music', 
+    icon: 'Music',
+    image: PlaceHolderImages.find(img => img.id === 'cat-music')?.imageUrl || 'https://picsum.photos/seed/music/400/300',
+    imageHint: 'music studio'
+  },
+  { 
+    id: 'photo', 
+    name: 'Photography', 
+    icon: 'Camera',
+    image: PlaceHolderImages.find(img => img.id === 'cat-photo')?.imageUrl || 'https://picsum.photos/seed/photo/400/300',
+    imageHint: 'photography camera'
+  },
+  { 
+    id: 'fitness', 
+    name: 'Fitness', 
+    icon: 'Dumbbell',
+    image: PlaceHolderImages.find(img => img.id === 'cat-fitness')?.imageUrl || 'https://picsum.photos/seed/fitness/400/300',
+    imageHint: 'fitness yoga'
+  },
+  { 
+    id: 'marketing', 
+    name: 'Marketing', 
+    icon: 'Megaphone',
+    image: PlaceHolderImages.find(img => img.id === 'cat-marketing')?.imageUrl || 'https://picsum.photos/seed/marketing/400/300',
+    imageHint: 'marketing strategy'
+  },
 ];
 
 export const TALENTS = [

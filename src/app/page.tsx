@@ -5,9 +5,18 @@ import { Button } from '@/components/ui/button';
 import { TalentCard } from '@/components/talent/TalentCard';
 import { WorkshopCard } from '@/components/workshop/WorkshopCard';
 import { CATEGORIES, TALENTS, WORKSHOPS } from '@/lib/mock-data';
-import { ArrowRight, Sparkles, CheckCircle, Search, Star, Globe } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle, Search, Star, Globe, Code, Palette, Music, Camera, Dumbbell, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+
+const iconMap: Record<string, any> = {
+  Code,
+  Palette,
+  Music,
+  Camera,
+  Dumbbell,
+  Megaphone
+};
 
 export default function Home() {
   return (
@@ -105,18 +114,30 @@ export default function Home() {
             <p className="text-muted-foreground">Find the perfect professional for your next project</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {CATEGORIES.map(cat => (
-              <Link 
-                key={cat.id} 
-                href={`/explore?category=${cat.id}`}
-                className="group p-8 rounded-3xl border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all text-center flex flex-col items-center"
-              >
-                <div className="h-16 w-16 rounded-2xl bg-secondary group-hover:bg-primary group-hover:text-white transition-all flex items-center justify-center mb-4">
-                   <Globe className="h-8 w-8" />
-                </div>
-                <span className="font-bold text-lg">{cat.name}</span>
-              </Link>
-            ))}
+            {CATEGORIES.map(cat => {
+              const Icon = iconMap[cat.icon] || Globe;
+              return (
+                <Link 
+                  key={cat.id} 
+                  href={`/explore?category=${cat.id}`}
+                  className="group relative h-48 rounded-3xl overflow-hidden border border-border/50 hover:shadow-xl transition-all"
+                >
+                  <Image 
+                    src={cat.image || 'https://picsum.photos/seed/ws/600/400'} 
+                    alt={cat.name} 
+                    fill 
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    data-ai-hint={cat.imageHint}
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-primary/60 transition-colors flex flex-col items-center justify-center text-white text-center p-4">
+                    <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md mb-3 flex items-center justify-center group-hover:bg-white group-hover:text-primary transition-all">
+                       <Icon className="h-6 w-6" />
+                    </div>
+                    <span className="font-bold text-lg">{cat.name}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

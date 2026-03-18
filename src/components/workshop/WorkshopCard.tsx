@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Calendar, Users, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
 interface WorkshopCardProps {
@@ -11,6 +12,15 @@ interface WorkshopCardProps {
 }
 
 export function WorkshopCard({ workshop }: WorkshopCardProps) {
+  const { toast } = useToast();
+
+  const handleEnroll = () => {
+    toast({
+      title: "Enrollment Started",
+      description: `You are now enrolling in ${workshop.title}. Please complete your profile to finish.`,
+    });
+  };
+
   return (
     <Card className="flex flex-col sm:flex-row overflow-hidden border-none shadow-sm hover:shadow-lg transition-all bg-card/50">
       <div className="relative w-full sm:w-48 aspect-video sm:aspect-square shrink-0">
@@ -55,9 +65,13 @@ export function WorkshopCard({ workshop }: WorkshopCardProps) {
         <div className="mt-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-1">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-bold">{workshop.rating}</span>
+            <span className="text-xs font-bold">{workshop.rating || '4.8'}</span>
           </div>
-          <Button size="sm" className="rounded-full px-6 bg-accent hover:bg-accent/90">
+          <Button 
+            size="sm" 
+            className="rounded-full px-6 bg-accent hover:bg-accent/90"
+            onClick={handleEnroll}
+          >
             Enroll Now
           </Button>
         </div>

@@ -38,21 +38,21 @@
     },
     {
       "id": "cat-coding",
-      "description": "Software development code on screen",
-      "imageUrl": "https://picsum.photos/seed/dev-code/400/300",
-      "imageHint": "coding programming"
+      "description": "Close up of lines of programming code",
+      "imageUrl": "https://picsum.photos/seed/programming-codes/400/300",
+      "imageHint": "coding codes"
     },
     {
       "id": "cat-design",
-      "description": "Graphic designer working on a tablet",
-      "imageUrl": "https://picsum.photos/seed/creative-design/400/300",
-      "imageHint": "graphic design"
+      "description": "Website design layout on a screen",
+      "imageUrl": "https://picsum.photos/seed/web-design-ui/400/300",
+      "imageHint": "web design"
     },
     {
       "id": "cat-music",
-      "description": "Music production studio setup",
-      "imageUrl": "https://picsum.photos/seed/music-studio/400/300",
-      "imageHint": "music studio"
+      "description": "Singer performing into a studio microphone",
+      "imageUrl": "https://picsum.photos/seed/singer-vocalist/400/300",
+      "imageHint": "singer singing"
     },
     {
       "id": "cat-photo",
@@ -62,15 +62,15 @@
     },
     {
       "id": "cat-fitness",
-      "description": "Modern fitness gym equipment",
-      "imageUrl": "https://picsum.photos/seed/fitness-gym/400/300",
-      "imageHint": "fitness yoga"
+      "description": "Modern gym with workout equipment",
+      "imageUrl": "https://picsum.photos/seed/gym-fitness/400/300",
+      "imageHint": "gym fitness"
     },
     {
       "id": "cat-marketing",
-      "description": "Digital marketing strategy analytics",
-      "imageUrl": "https://picsum.photos/seed/business-marketing/400/300",
-      "imageHint": "marketing strategy"
+      "description": "Digital marketing strategy and analytics",
+      "imageUrl": "https://picsum.photos/seed/digital-marketing-seo/400/300",
+      "imageHint": "digital marketing"
     }
   ]
 }

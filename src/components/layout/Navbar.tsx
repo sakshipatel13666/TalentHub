@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Search, Menu, User, Bell, MessageSquare, Loader2, Check } from 'lucide-react';
+import { Search, Menu, Bell, Loader2 } from 'lucide-react';
 import { useUser, useAuth, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, query, orderBy, limit, doc } from 'firebase/firestore';
@@ -142,10 +142,6 @@ export function Navbar() {
                   </ScrollArea>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <Button variant="ghost" size="icon">
-                <MessageSquare className="h-5 w-5" />
-              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

@@ -38,38 +38,38 @@
     },
     {
       "id": "cat-coding",
-      "description": "Modern software development workspace",
-      "imageUrl": "https://picsum.photos/seed/coding/400/300",
+      "description": "Software development code on screen",
+      "imageUrl": "https://picsum.photos/seed/dev-code/400/300",
       "imageHint": "coding programming"
     },
     {
       "id": "cat-design",
-      "description": "Creative graphic design studio",
-      "imageUrl": "https://picsum.photos/seed/design/400/300",
+      "description": "Graphic designer working on a tablet",
+      "imageUrl": "https://picsum.photos/seed/creative-design/400/300",
       "imageHint": "graphic design"
     },
     {
       "id": "cat-music",
-      "description": "Professional music recording studio",
-      "imageUrl": "https://picsum.photos/seed/music/400/300",
+      "description": "Music production studio setup",
+      "imageUrl": "https://picsum.photos/seed/music-studio/400/300",
       "imageHint": "music studio"
     },
     {
       "id": "cat-photo",
-      "description": "Professional photography equipment",
-      "imageUrl": "https://picsum.photos/seed/photo/400/300",
+      "description": "Professional DSLR camera lens",
+      "imageUrl": "https://picsum.photos/seed/camera-photo/400/300",
       "imageHint": "photography camera"
     },
     {
       "id": "cat-fitness",
-      "description": "Peaceful yoga and fitness studio",
-      "imageUrl": "https://picsum.photos/seed/fitness/400/300",
+      "description": "Modern fitness gym equipment",
+      "imageUrl": "https://picsum.photos/seed/fitness-gym/400/300",
       "imageHint": "fitness yoga"
     },
     {
       "id": "cat-marketing",
-      "description": "Business marketing strategy meeting",
-      "imageUrl": "https://picsum.photos/seed/marketing/400/300",
+      "description": "Digital marketing strategy analytics",
+      "imageUrl": "https://picsum.photos/seed/business-marketing/400/300",
       "imageHint": "marketing strategy"
     }
   ]

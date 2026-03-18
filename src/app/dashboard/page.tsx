@@ -316,9 +316,9 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Total Earnings" value={formattedEarnings} change="+0%" icon={IndianRupee} color="text-green-600" />
-          <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change="+0" icon={Briefcase} color="text-primary" />
-          <StatCard title="Workshops" value={myWorkshops?.length || 0} change="+0" icon={Calendar} color="text-accent" />
+          <StatCard title="Total Earnings" value={formattedEarnings} change="+12.5%" icon={IndianRupee} color="text-green-600" />
+          <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change={upcomingShows && upcomingShows.length > 0 ? `+${upcomingShows.length} new` : "Stable"} icon={Briefcase} color="text-primary" />
+          <StatCard title="Workshops" value={myWorkshops?.length || 0} change={myWorkshops && myWorkshops.length > 0 ? "Active" : "None"} icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />
         </div>
 
@@ -684,7 +684,11 @@ function StatCard({ title, value, change, icon: Icon, color }: any) {
           <div className={`p-3 rounded-2xl bg-secondary ${color} bg-opacity-10`}>
             <Icon className={`h-6 w-6 ${color}`} />
           </div>
-          <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">{change}</span>
+          {change && (
+            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full shrink-0">
+              {change}
+            </span>
+          )}
         </div>
         <div>
           <p className="text-sm text-muted-foreground mb-1">{title}</p>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef } from 'react';
@@ -8,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Briefcase, 
   Calendar, 
-  DollarSign, 
+  IndianRupee, 
   Star, 
   Music,
   Plus,
@@ -164,9 +163,9 @@ export default function DashboardPage() {
     return acc + value;
   }, 0) || 0;
 
-  const formattedEarnings = new Intl.NumberFormat('en-US', {
+  const formattedEarnings = new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
     maximumFractionDigits: 0,
   }).format(totalEarningsValue);
 
@@ -317,7 +316,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Total Earnings" value={formattedEarnings} change="+0%" icon={DollarSign} color="text-green-600" />
+          <StatCard title="Total Earnings" value={formattedEarnings} change="+0%" icon={IndianRupee} color="text-green-600" />
           <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change="+0" icon={Briefcase} color="text-primary" />
           <StatCard title="Workshops" value={myWorkshops?.length || 0} change="+0" icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />
@@ -543,7 +542,7 @@ export default function DashboardPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="payout">Payout</Label>
-                <Input id="payout" placeholder="e.g. $800" value={showForm.payout} onChange={(e) => setShowForm({ ...showForm, payout: e.target.value })} className="rounded-xl" />
+                <Input id="payout" placeholder="e.g. ₹800" value={showForm.payout} onChange={(e) => setShowForm({ ...showForm, payout: e.target.value })} className="rounded-xl" />
               </div>
             </div>
             <DialogFooter>
@@ -586,7 +585,7 @@ export default function DashboardPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="ws-price">Price</Label>
-                <Input id="ws-price" placeholder="e.g. $49 or Free" value={workshopForm.price} onChange={(e) => setWorkshopForm({ ...workshopForm, price: e.target.value })} className="rounded-xl" />
+                <Input id="ws-price" placeholder="e.g. ₹49 or Free" value={workshopForm.price} onChange={(e) => setWorkshopForm({ ...workshopForm, price: e.target.value })} className="rounded-xl" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="ws-max">Max Participants</Label>

@@ -47,21 +47,21 @@ export function AuthSync() {
         id: 'default-show-1',
         title: 'Acoustic Night Live',
         venue: 'The Garden Cafe',
-        payout: '$250',
+        payout: '₹250',
         date: '2024-12-15',
       },
       {
         id: 'default-show-2',
         title: 'Jazz in the Park',
         venue: 'Central Park Amphitheater',
-        payout: '$500',
+        payout: '₹500',
         date: '2024-12-20',
       },
       {
         id: 'default-show-3',
         title: 'Tech Conference Keynote',
         venue: 'Grand Hall Convention Center',
-        payout: '$1,200',
+        payout: '₹1,200',
         date: '2025-01-10',
       }
     ];
@@ -86,7 +86,7 @@ export function AuthSync() {
         id: 'default-ws-1',
         title: 'Mastering React Server Components',
         category: 'Coding',
-        price: '$49',
+        price: '₹49',
         date: '2024-12-24',
         participants: 12,
         maxParticipants: 20,

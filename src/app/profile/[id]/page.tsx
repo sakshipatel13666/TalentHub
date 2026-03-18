@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Navbar } from '@/components/layout/Navbar';
@@ -238,8 +237,8 @@ export default function ProfilePage() {
               
               <TabsContent value="services" className="mt-0 space-y-4">
                 {[
-                  { title: 'Standard Design Package', price: '$450', desc: 'Complete UI/UX design for up to 5 mobile or web pages.' },
-                  { title: 'Consultation & Strategy', price: '$120', desc: '1-hour video consultation to audit your current product UX.' }
+                  { title: 'Standard Design Package', price: '₹450', desc: 'Complete UI/UX design for up to 5 mobile or web pages.' },
+                  { title: 'Consultation & Strategy', price: '₹120', desc: '1-hour video consultation to audit your current product UX.' }
                 ].map((service, i) => (
                   <div key={i} className="bg-white p-6 rounded-2xl border border-border/50 flex justify-between items-center">
                     <div>
@@ -317,7 +316,7 @@ export default function ProfilePage() {
                       <div>
                         <p className="text-sm font-bold group-hover:text-primary transition-colors">Talent Masterclass</p>
                         <p className="text-xs text-muted-foreground">Next class: Oct 30</p>
-                        <p className="text-xs font-bold text-primary mt-1">$49</p>
+                        <p className="text-xs font-bold text-primary mt-1">₹49</p>
                       </div>
                     </div>
                   </div>

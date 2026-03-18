@@ -118,7 +118,7 @@ export default function ExplorePage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 block">Price Range (${priceRange[0]} - ${priceRange[1]})</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 block">Price Range (₹{priceRange[0]} - ₹{priceRange[1]})</label>
                   <div className="px-2">
                     <Slider 
                       value={[priceRange[1]]} 
@@ -128,8 +128,8 @@ export default function ExplorePage() {
                       className="mb-4" 
                     />
                     <div className="flex justify-between text-xs font-bold">
-                      <span>$0</span>
-                      <span>$500+</span>
+                      <span>₹0</span>
+                      <span>₹500+</span>
                     </div>
                   </div>
                 </div>

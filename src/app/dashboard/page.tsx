@@ -163,6 +163,13 @@ export default function DashboardPage() {
     return acc + value;
   }, 0) || 0;
 
+  // Formula: ((Current - Previous) / Previous) * 100
+  const mockPreviousMonthEarnings = 1500; // Mock historical data
+  const growth = mockPreviousMonthEarnings > 0 
+    ? ((totalEarningsValue - mockPreviousMonthEarnings) / mockPreviousMonthEarnings) * 100 
+    : 0;
+  const formattedGrowth = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
+
   const formattedEarnings = new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -316,7 +323,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Total Earnings" value={formattedEarnings} change="+12.5%" icon={IndianRupee} color="text-green-600" />
+          <StatCard title="Total Earnings" value={formattedEarnings} change={formattedGrowth} icon={IndianRupee} color="text-green-600" />
           <StatCard title="Active Bookings" value={upcomingShows?.length || 0} change={upcomingShows && upcomingShows.length > 0 ? `+${upcomingShows.length} new` : "Stable"} icon={Briefcase} color="text-primary" />
           <StatCard title="Workshops" value={myWorkshops?.length || 0} change={myWorkshops && myWorkshops.length > 0 ? "Active" : "None"} icon={Calendar} color="text-accent" />
           <StatCard title="Rating" value="4.9" change="124 reviews" icon={Star} color="text-yellow-500" />
